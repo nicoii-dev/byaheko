@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SettingsState } from '../types';
+import { SettingsState } from '../../types';
 
 const initialState: SettingsState = {
   notificationEnabled: true,

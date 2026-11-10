@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { LocationState, Location } from '../types';
-import { locationApi } from '../services/api/locationApi';
+import { LocationState, Location } from '../../types';
+import { locationApi } from '../../services/api/locationApi';
 
 const initialState: LocationState = {
   currentLocation: null,

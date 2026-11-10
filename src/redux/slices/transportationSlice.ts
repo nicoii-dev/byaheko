@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Transportation, BoardingPoint, TransportationState } from '../types';
-import { transportationApi } from '../services/api/transportationApi';
+import { Transportation, BoardingPoint, TransportationState } from '../../types';
+import { transportationApi } from '../../services/api/transportationApi';
 
 const initialState: TransportationState = {
   categories: [],
@@ -54,8 +54,8 @@ const transportationSlice = createSlice({
     filterByCategory: (state, action: PayloadAction<string | null>) => {
       state.selectedCategory = action.payload;
       if (action.payload) {
-        state.nearbyBoardingPoints = state.nearbyBoardingPoints.filter((bp) =>
-          bp.transportationTypes.includes(action.payload)
+        state.nearbyBoardingPoints = state.nearbyBoardingPoints.filter((bp: BoardingPoint) =>
+          bp.transportationTypes.includes(action.payload as string)
         );
       }
     },

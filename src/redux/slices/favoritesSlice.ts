@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Favorite, FavoritesState } from '../types';
-import { STORAGE_KEYS } from '../config/constants';
-import { storage } from '../services/storage';
-import { favoritesApi } from '../services/api/favoritesApi';
+import { Favorite, FavoritesState } from '../../types';
+import { STORAGE_KEYS } from '../../config/constants';
+import { storage } from '../../services/storage';
+import { favoritesApi } from '../../services/api/favoritesApi';
 
 const initialState: FavoritesState = {
   items: [],
@@ -14,7 +14,7 @@ export const loadFavorites = createAsyncThunk(
   'favorites/load',
   async (_, { rejectWithValue }) => {
     try {
-      const stored = storage.getItem(STORAGE_KEYS.FAVORITES);
+      const stored = await storage.getItem(STORAGE_KEYS.FAVORITES);
       if (stored) {
         return JSON.parse(stored) as Favorite[];
       }

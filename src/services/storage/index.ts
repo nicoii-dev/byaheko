@@ -1,33 +1,36 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const storage = {
-  getItem: async (key: string): Promise<string | null> => {
+  getItem: (key: string): Promise<string | null> => {
     try {
-      return await AsyncStorage.getItem(key);
+      return AsyncStorage.getItem(key);
     } catch (error) {
       console.warn(`Storage getItem failed for key: ${key}`, error);
-      return null;
+      return Promise.resolve(null);
     }
   },
-  setItem: async (key: string, value: string): Promise<void> => {
+  setItem: (key: string, value: string): Promise<void> => {
     try {
-      await AsyncStorage.setItem(key, value);
+      return AsyncStorage.setItem(key, value);
     } catch (error) {
       console.warn(`Storage setItem failed for key: ${key}`, error);
+      return Promise.resolve();
     }
   },
-  removeItem: async (key: string): Promise<void> => {
+  removeItem: (key: string): Promise<void> => {
     try {
-      await AsyncStorage.removeItem(key);
+      return AsyncStorage.removeItem(key);
     } catch (error) {
       console.warn(`Storage removeItem failed for key: ${key}`, error);
+      return Promise.resolve();
     }
   },
-  clear: async (): Promise<void> => {
+  clear: (): Promise<void> => {
     try {
-      await AsyncStorage.clear();
+      return AsyncStorage.clear();
     } catch (error) {
       console.warn('Storage clear failed', error);
+      return Promise.resolve();
     }
   },
 };

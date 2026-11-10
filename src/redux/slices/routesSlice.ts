@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Route, RouteOption, Trip, RoutesState, Location } from '../types';
-import { routesApi } from '../services/api/routesApi';
+import { Route, RouteOption, Trip, RoutesState } from '../../types';
+import { routesApi } from '../../services/api/routesApi';
 
 const initialState: RoutesState = {
   routes: [],

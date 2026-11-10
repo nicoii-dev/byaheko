@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Notification, NotificationsState } from '../types';
-import { notificationsApi } from '../services/api/notificationsApi';
+import { Notification, NotificationsState } from '../../types';
+import { notificationsApi } from '../../services/api/notificationsApi';
 
 const initialState: NotificationsState = {
   items: [],

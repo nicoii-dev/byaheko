@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { User, AuthState, AuthCredentials, AuthRegistration, AuthResponse } from '../types';
-import { STORAGE_KEYS } from '../config/constants';
-import { storage } from '../services/storage';
-import { authApi, mockAuth } from '../services/api/authApi';
+import { User, AuthState, AuthCredentials, AuthRegistration, AuthResponse } from '../../types';
+import { STORAGE_KEYS } from '../../config/constants';
+import { storage } from '../../services/storage';
+import { authApi } from '../../services/api/authApi';
 
 const initialState: AuthState = {
   user: null,
@@ -39,22 +39,22 @@ export const register = createAsyncThunk<AuthResponse, AuthRegistration>(
 export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
   try {
     await authApi.logout();
-    storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    storage.removeItem(STORAGE_KEYS.USER_DATA);
+    await storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    await storage.removeItem(STORAGE_KEYS.USER_DATA);
   } catch (error: any) {
     return rejectWithValue(error.message || 'Logout failed');
   }
 });
 
-export const checkAuthStatus = createAsyncThunk(
+export const checkAuthStatus = createAsyncThunk<AuthResponse | null>(
   'auth/checkStatus',
   async (_, { rejectWithValue }) => {
     try {
-      const token = storage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      const token = await storage.getItem(STORAGE_KEYS.AUTH_TOKEN);
       if (!token) {
         return null;
       }
-      const userJson = storage.getItem(STORAGE_KEYS.USER_DATA);
+      const userJson = await storage.getItem(STORAGE_KEYS.USER_DATA);
       if (userJson) {
         const user = JSON.parse(userJson) as User;
         return { user, token };
