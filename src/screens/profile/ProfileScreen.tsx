@@ -2,10 +2,10 @@ import React from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { useTheme } from "react-native-paper";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
-import { useAppSelector } from "../redux/hooks";
-import { useAppDispatch } from "../redux/hooks";
-import { logout } from "../redux/slices/authSlice";
-import { setThemeMode } from "../redux/slices/themeSlice";
+import { useAppSelector } from "../../redux/hooks";
+import { useAppDispatch } from "../../redux/hooks";
+import { logout } from "../../redux/slices/authSlice";
+import { setThemeMode } from "../../redux/slices/themeSlice";
 import { useNavigation } from "@react-navigation/native";
 
 const ProfileScreen = () => {

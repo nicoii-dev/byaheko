@@ -1,4 +1,4 @@
-import { Route, RouteOption, Trip } from "../types";
+import { Route, RouteOption, Trip } from "../../types";
 
 export interface IRoutesApi {
   getRoutes(): Promise<Route[]>;
@@ -94,18 +94,17 @@ export class MockRoutesApi implements IRoutesApi {
   ];
 
   async getRoutes(): Promise<Route[]> {
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    await new Promise<void>((resolve) => setTimeout(resolve, 400));
     return this.routes;
   }
 
   async getRouteDetails(routeId: string): Promise<Route | null> {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise<void>((resolve) => setTimeout(resolve, 300));
     return this.routes.find((r) => r.id === routeId) || null;
   }
 
   async planTrip(origin: any, destination: any): Promise<Trip> {
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    const route = this.routes[0];
+    await new Promise<void>((resolve) => setTimeout(resolve, 800));
     const boardingPoint = {
       id: "bp_1",
       name: "SM City CDO Jeepney Terminal",

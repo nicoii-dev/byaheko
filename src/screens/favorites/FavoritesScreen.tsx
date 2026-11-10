@@ -2,16 +2,14 @@ import React, { useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { useTheme } from "react-native-paper";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
-import { useAppSelector } from "../redux/hooks";
-import { useAppDispatch } from "../redux/hooks";
-import { loadFavorites, removeFavorite } from "../redux/slices/favoritesSlice";
-import { useNavigation } from "@react-navigation/native";
+import { useAppSelector } from "../../redux/hooks";
+import { useAppDispatch } from "../../redux/hooks";
+import { loadFavorites, removeFavorite } from "../../redux/slices/favoritesSlice";
 
 const FavoritesScreen = () => {
   const theme = useTheme();
-  const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
-  const { items, loading } = useAppSelector((state) => state.favorites);
+  const { items } = useAppSelector((state) => state.favorites);
 
   useEffect(() => {
     dispatch(loadFavorites());

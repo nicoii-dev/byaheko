@@ -1,4 +1,4 @@
-import { Notification } from "../types";
+import { Notification } from "../../types";
 
 export interface INotificationsApi {
   getNotifications(): Promise<Notification[]>;
@@ -37,12 +37,12 @@ export class MockNotificationsApi implements INotificationsApi {
   ];
 
   async getNotifications(): Promise<Notification[]> {
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    await new Promise<void>((resolve) => setTimeout(resolve, 400));
     return this.notifications;
   }
 
   async markRead(id: string): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise<void>((resolve) => setTimeout(resolve, 200));
     const notification = this.notifications.find((n) => n.id === id);
     if (notification) {
       notification.read = true;

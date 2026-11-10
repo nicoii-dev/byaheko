@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useTheme } from "react-native-paper";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
@@ -7,8 +7,6 @@ import { storage } from "../services/storage";
 import { STORAGE_KEYS } from "../config/constants";
 import ByaheKoLogo from "../components/ByaheKoLogo";
 import AppButton from "../components/shared/AppButton";
-
-const { width: screenWidth } = Dimensions.get("window");
 
 const onboardingData = [
   {

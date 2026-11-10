@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { useTheme } from "react-native-paper";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
-import { useAppSelector } from "../redux/hooks";
-import { useAppDispatch } from "../redux/hooks";
-import { setSelectedOrigin, setSelectedDestination, swapOriginDestination, clearSelectedLocations } from "../redux/slices/locationSlice";
-import { planTrip, clearRouteOptions } from "../redux/slices/routesSlice";
+import { useAppSelector } from "../../redux/hooks";
+import { useAppDispatch } from "../../redux/hooks";
+import {
+  swapOriginDestination,
+} from "../../redux/slices/locationSlice";
+import { planTrip } from "../../redux/slices/routesSlice";
 import { useNavigation } from "@react-navigation/native";
 
 const TripPlannerScreen = () => {
@@ -25,8 +27,8 @@ const TripPlannerScreen = () => {
     }
     try {
       await dispatch(planTrip({ origin, destination }));
-    } catch (err) {
-      console.error("Trip planning failed", err);
+    } catch {
+      console.error("Trip planning failed");
     }
   };
 
@@ -42,7 +44,7 @@ const TripPlannerScreen = () => {
 
         <View style={styles.locationContainer}>
           <View style={[styles.locationInput, { backgroundColor: theme.colors.surface }]}>
-            <View style={[styles.dot, { backgroundColor: theme.colors.success }]} />
+            <View style={[styles.dot, { backgroundColor: "#2E7D52" }]} />
             <Text style={[styles.locationText, { color: theme.colors.onSurface }]}>
               {selectedOrigin?.name || currentLocation?.name || "Current Location"}
             </Text>

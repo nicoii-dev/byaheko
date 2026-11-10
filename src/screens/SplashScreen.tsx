@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { useTheme } from "react-native-paper";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import { useAppDispatch } from "../redux/hooks";
 import { checkAuthStatus } from "../redux/slices/authSlice";
@@ -14,10 +13,10 @@ const SplashScreen = () => {
 
   useEffect(() => {
     const initializeApp = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const result = await dispatch(checkAuthStatus());
-      const state = (result as any).payload;
-      if (state && (state as any).user) {
+      await new Promise<void>((resolve) => setTimeout(resolve, 2000));
+      const result: any = await dispatch(checkAuthStatus());
+      const state = result?.payload;
+      if (state && state.user) {
         navigation.reset({
           index: 0,
           routes: [{ name: "Main" }],

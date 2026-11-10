@@ -4,7 +4,7 @@ import { useTheme } from "react-native-paper";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { KeyboardAvoidingView, Platform } from "react-native";
 
 import { loginSchema, LoginFormData } from "../../features/auth/schemas/loginSchema";
@@ -47,7 +47,7 @@ const LoginScreen = () => {
         index: 0,
         routes: [{ name: "Main" }],
       });
-    } catch (err) {
+    } catch {
       setError("email" as any, {
         type: "manual",
         message: "An unexpected error occurred",
@@ -76,7 +76,7 @@ const LoginScreen = () => {
           </View>
 
           <View style={styles.form}>
-            <AppTextInput
+            <AppTextInput<LoginFormData>
               name="email"
               control={control}
               label="Email Address"
@@ -87,7 +87,7 @@ const LoginScreen = () => {
               error={errors.email?.message}
             />
 
-            <AppPasswordInput
+            <AppPasswordInput<LoginFormData>
               name="password"
               control={control}
               label="Password"

@@ -1,4 +1,4 @@
-import { Transportation, BoardingPoint } from '../types';
+import { Transportation, BoardingPoint } from "../../types";
 
 export interface ITransportationApi {
   getCategories(): Promise<Transportation[]>;
@@ -13,12 +13,12 @@ export interface ITransportationApi {
 
 export class TransportationApi implements ITransportationApi {
   async getCategories(): Promise<Transportation[]> {
-    const response = await api.get('/transportation/categories');
+    const response = await api.get("/transportation/categories");
     return response.data;
   }
 
   async getBoardingPoints(): Promise<BoardingPoint[]> {
-    const response = await api.get('/transportation/boarding-points');
+    const response = await api.get("/transportation/boarding-points");
     return response.data;
   }
 
@@ -27,7 +27,7 @@ export class TransportationApi implements ITransportationApi {
     longitude: number,
     radiusKm: number = 2
   ): Promise<BoardingPoint[]> {
-    const response = await api.get('/transportation/boarding-points/nearby', {
+    const response = await api.get("/transportation/boarding-points/nearby", {
       params: { latitude, longitude, radiusKm },
     });
     return response.data;
@@ -42,125 +42,125 @@ export class TransportationApi implements ITransportationApi {
 export class MockTransportationApi implements ITransportationApi {
   private categories: Transportation[] = [
     {
-      id: 'cat_jeepney',
-      name: 'Jeepney',
-      category: 'jeepney',
-      icon: 'jeepney',
-      description: 'Traditional Philippine jeepney',
+      id: "cat_jeepney",
+      name: "Jeepney",
+      category: "jeepney",
+      icon: "jeepney",
+      description: "Traditional Philippine jeepney",
     },
     {
-      id: 'cat_modern_jeepney',
-      name: 'Modern Jeepney',
-      category: 'modern_jeepney',
-      icon: 'bus',
-      description: 'Eco-friendly modern jeepney',
+      id: "cat_modern_jeepney",
+      name: "Modern Jeepney",
+      category: "modern_jeepney",
+      icon: "bus",
+      description: "Eco-friendly modern jeepney",
     },
     {
-      id: 'cat_multicab',
-      name: 'Multicab',
-      category: 'multicab',
-      icon: 'car',
-      description: 'Multi-passenger cab',
+      id: "cat_multicab",
+      name: "Multicab",
+      category: "multicab",
+      icon: "car",
+      description: "Multi-passenger cab",
     },
     {
-      id: 'cat_tricycle',
-      name: 'Tricycle',
-      category: 'tricycle',
-      icon: 'motorcycle',
-      description: 'Motorcycle with sidecar',
+      id: "cat_tricycle",
+      name: "Tricycle",
+      category: "tricycle",
+      icon: "motorcycle",
+      description: "Motorcycle with sidecar",
     },
     {
-      id: 'cat_bus',
-      name: 'Bus',
-      category: 'bus',
-      icon: 'bus',
-      description: 'Large public bus',
+      id: "cat_bus",
+      name: "Bus",
+      category: "bus",
+      icon: "bus",
+      description: "Large public bus",
     },
     {
-      id: 'cat_uv_express',
-      name: 'UV Express',
-      category: 'uv_express',
-      icon: 'car',
-      description: 'Air-conditioned van',
+      id: "cat_uv_express",
+      name: "UV Express",
+      category: "uv_express",
+      icon: "car",
+      description: "Air-conditioned van",
     },
     {
-      id: 'cat_van',
-      name: 'Van',
-      category: 'van',
-      icon: 'car',
-      description: 'Public utility van',
+      id: "cat_van",
+      name: "Van",
+      category: "van",
+      icon: "car",
+      description: "Public utility van",
     },
     {
-      id: 'cat_ferry',
-      name: 'Ferry',
-      category: 'ferry',
-      icon: 'ship',
-      description: 'Water transport',
+      id: "cat_ferry",
+      name: "Ferry",
+      category: "ferry",
+      icon: "ship",
+      description: "Water transport",
     },
     {
-      id: 'cat_train',
-      name: 'Train',
-      category: 'train',
-      icon: 'train',
-      description: 'Rail transport',
+      id: "cat_train",
+      name: "Train",
+      category: "train",
+      icon: "train",
+      description: "Rail transport",
     },
   ];
 
   private boardingPoints: BoardingPoint[] = [
     {
-      id: 'bp_1',
-      name: 'SM CDO Jeepney Terminal',
+      id: "bp_1",
+      name: "SM CDO Jeepney Terminal",
       latitude: 8.4542,
       longitude: 124.6319,
-      address: 'SM City Cagayan de Oro, Uptown, CDO',
-      transportationTypes: ['jeepney', 'modern_jeepney'],
-      routeIds: ['route_cdo_01', 'route_cdo_02'],
+      address: "SM City Cagayan de Oro, Uptown, CDO",
+      transportationTypes: ["jeepney", "modern_jeepney"],
+      routeIds: ["route_cdo_01", "route_cdo_02"],
     },
     {
-      id: 'bp_2',
-      name: 'Centrio Mall Jeepney Stop',
+      id: "bp_2",
+      name: "Centrio Mall Jeepney Stop",
       latitude: 8.4795,
       longitude: 124.6417,
-      address: 'Centrio Mall, Uptown, CDO',
-      transportationTypes: ['jeepney', 'modern_jeepney'],
-      routeIds: ['route_cdo_02'],
+      address: "Centrio Mall, Uptown, CDO",
+      transportationTypes: ["jeepney", "modern_jeepney"],
+      routeIds: ["route_cdo_02"],
     },
     {
-      id: 'bp_3',
-      name: 'CDO City Hall Bus Stop',
+      id: "bp_3",
+      name: "CDO City Hall Bus Stop",
       latitude: 8.4541,
       longitude: 124.6356,
-      address: 'City Hall, CDO',
-      transportationTypes: ['bus', 'jeepney'],
-      routeIds: ['route_cdo_03'],
+      address: "City Hall, CDO",
+      transportationTypes: ["bus", "jeepney"],
+      routeIds: ["route_cdo_03"],
     },
     {
-      id: 'bp_4',
-      name: 'Limketkai UV Express Terminal',
+      id: "bp_4",
+      name: "Limketkai UV Express Terminal",
       latitude: 8.4744,
       longitude: 124.6493,
-      address: 'Limketkai Center, Uptown, CDO',
-      transportationTypes: ['uv_express', 'van'],
-      routeIds: ['route_cdo_04'],
+      address: "Limketkai Center, Uptown, CDO",
+      transportationTypes: ["uv_express", "van"],
+      routeIds: ["route_cdo_04"],
     },
     {
-      id: 'bp_5',
-      name: 'MacArthur Highway Tricycle Stand',
+      id: "bp_5",
+      name: "MacArthur Highway Tricycle Stand",
       latitude: 8.4812,
       longitude: 124.6541,
-      address: 'MacArthur Highway, CDO',
-      transportationTypes: ['tricycle'],
+      address: "MacArthur Highway, CDO",
+      transportationTypes: ["tricycle"],
       routeIds: [],
     },
   ];
 
   async getCategories(): Promise<Transportation[]> {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise<void>((resolve) => setTimeout(resolve, 300));
     return this.categories;
   }
 
   async getBoardingPoints(): Promise<BoardingPoint[]> {
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    await new Promise<void>((resolve) => setTimeout(resolve, 400));
     return this.boardingPoints;
   }
 
@@ -169,15 +169,20 @@ export class MockTransportationApi implements ITransportationApi {
     longitude: number,
     radiusKm: number = 2
   ): Promise<BoardingPoint[]> {
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
     return this.boardingPoints.filter((bp) => {
-      const distance = this.calculateDistance(latitude, longitude, bp.latitude, bp.longitude);
+      const distance = this.calculateDistance(
+        latitude,
+        longitude,
+        bp.latitude,
+        bp.longitude
+      );
       return distance <= radiusKm;
     });
   }
 
   async getBoardingPoint(id: string): Promise<BoardingPoint | null> {
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise<void>((resolve) => setTimeout(resolve, 200));
     return this.boardingPoints.find((bp) => bp.id === id) || null;
   }
 
@@ -200,5 +205,5 @@ export class MockTransportationApi implements ITransportationApi {
   }
 }
 
-import api from './index';
+import api from "./index";
 export const transportationApi: ITransportationApi = new MockTransportationApi();

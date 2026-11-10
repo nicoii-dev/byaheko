@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useTheme } from "react-native-paper";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
-import { useAppSelector } from "../redux/hooks";
-import { useAppDispatch } from "../redux/hooks";
-import { loadTransportationData } from "../redux/slices/transportationSlice";
-import { useEffect } from "react";
+import { useAppSelector } from "../../redux/hooks";
+import { useAppDispatch } from "../../redux/hooks";
+import { loadTransportationData } from "../../redux/slices/transportationSlice";
 
 const HomeScreen = () => {
   const theme = useTheme();
@@ -40,7 +39,7 @@ const HomeScreen = () => {
 
       <View style={styles.content}>
         <View style={[styles.searchContainer, { backgroundColor: theme.colors.surface }]}>
-          <Text style={[styles.searchIcon]}>🔍</Text>
+          <Text style={styles.searchIcon}>🔍</Text>
           <Text style={[styles.searchPlaceholder, { color: theme.colors.onSurfaceVariant }]}>
             Where do you want to go?
           </Text>
@@ -64,7 +63,7 @@ const HomeScreen = () => {
               <Text style={styles.categoryEmoji}>
                 {category.category === "jeepney" ? "🛻" :
                  category.category === "bus" ? "🚌" :
-                 category.category === "tricycle" ? "摩托车" :
+                 category.category === "tricycle" ? "🏍️" :
                  category.category === "ferry" ? "⛵" :
                  category.category === "train" ? "🚆" : "🚗"}
               </Text>

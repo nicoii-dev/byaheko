@@ -1,4 +1,4 @@
-import { Favorite } from "../types";
+import { Favorite } from "../../types";
 
 export interface IFavoritesApi {
   getFavorites(): Promise<Favorite[]>;
@@ -25,17 +25,17 @@ export class MockFavoritesApi implements IFavoritesApi {
   private favorites: Favorite[] = [];
 
   async getFavorites(): Promise<Favorite[]> {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise<void>((resolve) => setTimeout(resolve, 300));
     return this.favorites;
   }
 
   async addFavorite(favorite: Favorite): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise<void>((resolve) => setTimeout(resolve, 300));
     this.favorites.push(favorite);
   }
 
   async removeFavorite(id: string): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise<void>((resolve) => setTimeout(resolve, 300));
     this.favorites = this.favorites.filter((f) => f.id !== id);
   }
 }

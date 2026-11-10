@@ -4,9 +4,9 @@ import { TextInput, useTheme } from "react-native-paper";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { Controller, Control } from "react-hook-form";
 
-interface AppTextInputProps {
-  name: string;
-  control: Control<any>;
+interface AppTextInputProps<T extends Record<string, any>> {
+  name: keyof T & string;
+  control: Control<T>;
   label: string;
   placeholder?: string;
   error?: string;
@@ -22,7 +22,7 @@ interface AppTextInputProps {
   containerStyle?: any;
 }
 
-const AppTextInput: React.FC<AppTextInputProps> = ({
+const AppTextInput = <T extends Record<string, any>>({
   name,
   control,
   label,
@@ -38,14 +38,14 @@ const AppTextInput: React.FC<AppTextInputProps> = ({
   editable = true,
   maxLength,
   containerStyle,
-}) => {
+}: AppTextInputProps<T>) => {
   const theme = useTheme();
 
   return (
     <View style={[styles.container, containerStyle]}>
       <Controller
         control={control}
-        name={name}
+        name={name as any}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
             mode="outlined"

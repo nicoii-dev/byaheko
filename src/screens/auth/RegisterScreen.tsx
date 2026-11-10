@@ -4,7 +4,7 @@ import { useTheme } from "react-native-paper";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { KeyboardAvoidingView, Platform } from "react-native";
 
 import { registerSchema, RegisterFormData } from "../../features/auth/schemas/registerSchema";
@@ -51,7 +51,7 @@ const RegisterScreen = () => {
         index: 0,
         routes: [{ name: "Main" }],
       });
-    } catch (err) {
+    } catch {
       setError("email" as any, {
         type: "manual",
         message: "An unexpected error occurred",
@@ -82,7 +82,7 @@ const RegisterScreen = () => {
           <View style={styles.form}>
             <View style={styles.row}>
               <View style={styles.halfField}>
-                <AppTextInput
+                <AppTextInput<RegisterFormData>
                   name="firstName"
                   control={control}
                   label="First Name"
@@ -93,7 +93,7 @@ const RegisterScreen = () => {
                 />
               </View>
               <View style={styles.halfField}>
-                <AppTextInput
+                <AppTextInput<RegisterFormData>
                   name="lastName"
                   control={control}
                   label="Last Name"
@@ -104,7 +104,7 @@ const RegisterScreen = () => {
               </View>
             </View>
 
-            <AppTextInput
+            <AppTextInput<RegisterFormData>
               name="email"
               control={control}
               label="Email Address"
@@ -115,7 +115,7 @@ const RegisterScreen = () => {
               error={errors.email?.message}
             />
 
-            <AppTextInput
+            <AppTextInput<RegisterFormData>
               name="mobileNumber"
               control={control}
               label="Mobile Number"
@@ -125,7 +125,7 @@ const RegisterScreen = () => {
               error={errors.mobileNumber?.message}
             />
 
-            <AppPasswordInput
+            <AppPasswordInput<RegisterFormData>
               name="password"
               control={control}
               label="Password"
@@ -133,7 +133,7 @@ const RegisterScreen = () => {
               error={errors.password?.message}
             />
 
-            <AppPasswordInput
+            <AppPasswordInput<RegisterFormData>
               name="confirmPassword"
               control={control}
               label="Confirm Password"

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Route, RouteOption, Trip, RoutesState } from '../../types';
+import { Route, Trip, RoutesState } from '../../types';
 import { routesApi } from '../../services/api/routesApi';
 
 const initialState: RoutesState = {
@@ -37,7 +37,11 @@ export const getRouteDetails = createAsyncThunk<Route, string>(
   'routes/getDetails',
   async (routeId, { rejectWithValue }) => {
     try {
-      return await routesApi.getRouteDetails(routeId);
+      const route = await routesApi.getRouteDetails(routeId);
+      if (!route) {
+        return rejectWithValue("Route not found");
+      }
+      return route;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to load route details');
     }

@@ -4,7 +4,7 @@ import { useTheme } from "react-native-paper";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { KeyboardAvoidingView, Platform } from "react-native";
 
 import { forgotPasswordSchema, ForgotPasswordFormData } from "../../features/auth/schemas/forgotPasswordSchema";
@@ -16,6 +16,8 @@ const ForgotPasswordScreen = () => {
   const navigation = useNavigation<any>();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState("");
+
+  const successColor = "#2E7D52";
 
   const {
     control,
@@ -31,10 +33,10 @@ const ForgotPasswordScreen = () => {
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
       setSubmittedEmail(data.email);
       setIsSubmitted(true);
-    } catch (err) {
+    } catch {
       setError("email" as any, {
         type: "manual",
         message: "An unexpected error occurred",
@@ -47,8 +49,8 @@ const ForgotPasswordScreen = () => {
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.successContainer}>
-            <View style={[styles.successIcon, { backgroundColor: theme.colors.success + "20" }]}>
-              <Text style={[styles.successEmoji, { color: theme.colors.success }]}>✓</Text>
+            <View style={[styles.successIcon, { backgroundColor: successColor + "20" }]}>
+              <Text style={[styles.successEmoji, { color: successColor }]}>✓</Text>
             </View>
             <Text style={[styles.successTitle, { color: theme.colors.onBackground }]}>
               Check your email
@@ -88,7 +90,7 @@ const ForgotPasswordScreen = () => {
           </View>
 
           <View style={styles.form}>
-            <AppTextInput
+            <AppTextInput<ForgotPasswordFormData>
               name="email"
               control={control}
               label="Email Address"

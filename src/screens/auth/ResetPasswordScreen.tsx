@@ -4,7 +4,7 @@ import { useTheme } from "react-native-paper";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { KeyboardAvoidingView, Platform } from "react-native";
 
 import { resetPasswordSchema, ResetPasswordFormData } from "../../features/auth/schemas/resetPasswordSchema";
@@ -16,6 +16,8 @@ const ResetPasswordScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation<any>();
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const successColor = "#2E7D52";
 
   const {
     control,
@@ -31,11 +33,11 @@ const ResetPasswordScreen = () => {
     },
   });
 
-  const onSubmit = async (data: ResetPasswordFormData) => {
+  const onSubmit = async (_data: ResetPasswordFormData) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
       setIsSubmitted(true);
-    } catch (err) {
+    } catch {
       setError("code" as any, {
         type: "manual",
         message: "Invalid or expired reset code",
@@ -48,8 +50,8 @@ const ResetPasswordScreen = () => {
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.successContainer}>
-            <View style={[styles.successIcon, { backgroundColor: theme.colors.success + "20" }]}>
-              <Text style={[styles.successEmoji, { color: theme.colors.success }]}>✓</Text>
+            <View style={[styles.successIcon, { backgroundColor: successColor + "20" }]}>
+              <Text style={[styles.successEmoji, { color: successColor }]}>✓</Text>
             </View>
             <Text style={[styles.successTitle, { color: theme.colors.onBackground }]}>
               Password reset successful
@@ -89,7 +91,7 @@ const ResetPasswordScreen = () => {
           </View>
 
           <View style={styles.form}>
-            <AppTextInput
+            <AppTextInput<ResetPasswordFormData>
               name="code"
               control={control}
               label="Reset Code"
@@ -99,7 +101,7 @@ const ResetPasswordScreen = () => {
               error={errors.code?.message}
             />
 
-            <AppPasswordInput
+            <AppPasswordInput<ResetPasswordFormData>
               name="newPassword"
               control={control}
               label="New Password"
@@ -107,7 +109,7 @@ const ResetPasswordScreen = () => {
               error={errors.newPassword?.message}
             />
 
-            <AppPasswordInput
+            <AppPasswordInput<ResetPasswordFormData>
               name="confirmPassword"
               control={control}
               label="Confirm New Password"

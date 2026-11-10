@@ -4,9 +4,9 @@ import { TextInput, useTheme } from "react-native-paper";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { Controller, Control } from "react-hook-form";
 
-interface AppPasswordInputProps {
-  name: string;
-  control: Control<any>;
+interface AppPasswordInputProps<T extends Record<string, any>> {
+  name: keyof T & string;
+  control: Control<T>;
   label: string;
   placeholder?: string;
   error?: string;
@@ -14,7 +14,7 @@ interface AppPasswordInputProps {
   containerStyle?: any;
 }
 
-const AppPasswordInput: React.FC<AppPasswordInputProps> = ({
+const AppPasswordInput = <T extends Record<string, any>>({
   name,
   control,
   label,
@@ -22,7 +22,7 @@ const AppPasswordInput: React.FC<AppPasswordInputProps> = ({
   error,
   editable = true,
   containerStyle,
-}) => {
+}: AppPasswordInputProps<T>) => {
   const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -30,7 +30,7 @@ const AppPasswordInput: React.FC<AppPasswordInputProps> = ({
     <View style={[styles.container, containerStyle]}>
       <Controller
         control={control}
-        name={name}
+        name={name as any}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
             mode="outlined"
