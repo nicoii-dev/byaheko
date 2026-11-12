@@ -1,54 +1,30 @@
-import { Notification } from "../../types";
+import type { AppNotification } from '../../types';
+import { environment } from '../../config/environment';
+import api from './client';
+import { MockNotificationsApi } from '../mock/notificationsApi';
 
 export interface INotificationsApi {
-  getNotifications(): Promise<Notification[]>;
+  getNotifications(): Promise<AppNotification[]>;
   markRead(id: string): Promise<void>;
+  markAllRead(): Promise<void>;
 }
 
 export class NotificationsApi implements INotificationsApi {
-  async getNotifications(): Promise<Notification[]> {
-    const response = await api.get("/notifications");
+  async getNotifications(): Promise<AppNotification[]> {
+    const response = await api.get<AppNotification[]>('/notifications');
     return response.data;
   }
 
   async markRead(id: string): Promise<void> {
     await api.patch(`/notifications/${id}/read`, {});
   }
-}
 
-export class MockNotificationsApi implements INotificationsApi {
-  private notifications: Notification[] = [
-    {
-      id: "notif_1",
-      title: "Route Advisory",
-      message: "Jeepney route CDO-01 will have temporary detours this weekend.",
-      type: "advisory",
-      timestamp: new Date().toISOString(),
-      read: false,
-    },
-    {
-      id: "notif_2",
-      title: "Service Update",
-      message: "Modern jeepney service now available on Centrio - SM City route.",
-      type: "update",
-      timestamp: new Date(Date.now() - 86400000).toISOString(),
-      read: true,
-    },
-  ];
-
-  async getNotifications(): Promise<Notification[]> {
-    await new Promise<void>((resolve) => setTimeout(resolve, 400));
-    return this.notifications;
-  }
-
-  async markRead(id: string): Promise<void> {
-    await new Promise<void>((resolve) => setTimeout(resolve, 200));
-    const notification = this.notifications.find((n) => n.id === id);
-    if (notification) {
-      notification.read = true;
-    }
+  async markAllRead(): Promise<void> {
+    await api.patch('/notifications/read-all', {});
   }
 }
 
-import api from "./index";
-export const notificationsApi: INotificationsApi = new MockNotificationsApi();
+export const notificationsApi: INotificationsApi =
+  environment.enableMockServices
+    ? new MockNotificationsApi()
+    : new NotificationsApi();

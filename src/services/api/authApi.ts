@@ -1,22 +1,38 @@
-import { User, AuthCredentials, AuthRegistration, AuthResponse } from "../../types";
-import { STORAGE_KEYS } from "../../config/constants";
-import { storage } from "../storage";
+import type {
+  AuthCredentials,
+  AuthRegistration,
+  AuthResponse,
+  UpdateProfileInput,
+  User,
+} from '../../types';
+import { environment } from '../../config/environment';
+import api from './client';
+import { MockAuthApi } from '../mock/authApi';
 
 export interface IAuthApi {
   login(credentials: AuthCredentials): Promise<AuthResponse>;
   register(data: AuthRegistration): Promise<AuthResponse>;
+  verifyEmail(email: string, code: string): Promise<AuthResponse>;
+  resendVerification(email: string): Promise<void>;
+  requestPasswordReset(email: string): Promise<void>;
+  resetPassword(
+    email: string,
+    code: string,
+    newPassword: string,
+  ): Promise<void>;
+  updateProfile(input: UpdateProfileInput): Promise<User>;
   logout(): Promise<void>;
   getCurrentUser(): Promise<User>;
 }
 
 export class AuthApi implements IAuthApi {
   async login(credentials: AuthCredentials): Promise<AuthResponse> {
-    const response = await api.post("/auth/login", credentials);
+    const response = await api.post<AuthResponse>('/auth/login', credentials);
     return response.data;
   }
 
   async register(data: AuthRegistration): Promise<AuthResponse> {
-    const response = await api.post("/auth/register", {
+    const response = await api.post<AuthResponse>('/auth/register', {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
@@ -26,73 +42,45 @@ export class AuthApi implements IAuthApi {
     return response.data;
   }
 
+  async verifyEmail(email: string, code: string): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/verify-email', {
+      email,
+      code,
+    });
+    return response.data;
+  }
+
+  async resendVerification(email: string): Promise<void> {
+    await api.post('/auth/resend-verification', { email });
+  }
+
+  async requestPasswordReset(email: string): Promise<void> {
+    await api.post('/auth/forgot-password', { email });
+  }
+
+  async resetPassword(
+    email: string,
+    code: string,
+    newPassword: string,
+  ): Promise<void> {
+    await api.post('/auth/reset-password', { email, code, newPassword });
+  }
+
+  async updateProfile(input: UpdateProfileInput): Promise<User> {
+    const response = await api.patch<User>('/users/me', input);
+    return response.data;
+  }
+
   async logout(): Promise<void> {
-    await api.post("/auth/logout");
+    await api.post('/auth/logout');
   }
 
   async getCurrentUser(): Promise<User> {
-    const response = await api.get("/auth/me");
+    const response = await api.get<User>('/auth/me');
     return response.data;
   }
 }
 
-export class MockAuthApi implements IAuthApi {
-  private users: User[] = [
-    {
-      id: "user_1",
-      firstName: "Juan",
-      lastName: "Dela Cruz",
-      email: "juan@example.com",
-      mobileNumber: "09171234567",
-      createdAt: new Date().toISOString(),
-    },
-  ];
-
-  async login(credentials: AuthCredentials): Promise<AuthResponse> {
-    await new Promise<void>((resolve) => setTimeout(resolve, 800));
-    const user = this.users.find((u) => u.email === credentials.email);
-    if (!user || credentials.password !== "password123") {
-      throw new Error("Invalid email or password");
-    }
-    return {
-      user,
-      token: `mock_token_${user.id}`,
-    };
-  }
-
-  async register(data: AuthRegistration): Promise<AuthResponse> {
-    await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-    if (this.users.some((u) => u.email === data.email)) {
-      throw new Error("Email already registered");
-    }
-    const newUser: User = {
-      id: `user_${Date.now()}`,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      mobileNumber: data.mobileNumber,
-      createdAt: new Date().toISOString(),
-    };
-    this.users.push(newUser);
-    return {
-      user: newUser,
-      token: `mock_token_${newUser.id}`,
-    };
-  }
-
-  async logout(): Promise<void> {
-    await new Promise<void>((resolve) => setTimeout(resolve, 300));
-  }
-
-  async getCurrentUser(): Promise<User> {
-    await new Promise<void>((resolve) => setTimeout(resolve, 500));
-    const token = await storage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-    if (!token) throw new Error("Not authenticated");
-    const userJson = await storage.getItem(STORAGE_KEYS.USER_DATA);
-    if (!userJson) throw new Error("User data not found");
-    return JSON.parse(userJson) as User;
-  }
-}
-
-import api from "./index";
-export const authApi: IAuthApi = new MockAuthApi();
+export const authApi: IAuthApi = environment.enableMockServices
+  ? new MockAuthApi()
+  : new AuthApi();

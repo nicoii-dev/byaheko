@@ -1,37 +1,49 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const storage = {
-  getItem: (key: string): Promise<string | null> => {
+  getItem: async (key: string): Promise<string | null> => {
     try {
-      return AsyncStorage.getItem(key);
+      return await AsyncStorage.getItem(key);
     } catch (error) {
       console.warn(`Storage getItem failed for key: ${key}`, error);
-      return Promise.resolve(null);
+      return null;
     }
   },
-  setItem: (key: string, value: string): Promise<void> => {
+  setItem: async (key: string, value: string): Promise<void> => {
     try {
-      return AsyncStorage.setItem(key, value);
+      await AsyncStorage.setItem(key, value);
     } catch (error) {
       console.warn(`Storage setItem failed for key: ${key}`, error);
-      return Promise.resolve();
     }
   },
-  removeItem: (key: string): Promise<void> => {
+  removeItem: async (key: string): Promise<void> => {
     try {
-      return AsyncStorage.removeItem(key);
+      await AsyncStorage.removeItem(key);
     } catch (error) {
       console.warn(`Storage removeItem failed for key: ${key}`, error);
-      return Promise.resolve();
     }
   },
-  clear: (): Promise<void> => {
+  clear: async (): Promise<void> => {
     try {
-      return AsyncStorage.clear();
+      await AsyncStorage.clear();
     } catch (error) {
       console.warn('Storage clear failed', error);
-      return Promise.resolve();
     }
+  },
+  getJson: async <T,>(key: string): Promise<T | null> => {
+    const value = await storage.getItem(key);
+    if (!value) {
+      return null;
+    }
+    try {
+      return JSON.parse(value) as T;
+    } catch (error) {
+      console.warn(`Storage JSON parse failed for key: ${key}`, error);
+      return null;
+    }
+  },
+  setJson: async <T,>(key: string, value: T): Promise<void> => {
+    await storage.setItem(key, JSON.stringify(value));
   },
 };
 

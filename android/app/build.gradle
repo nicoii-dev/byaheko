@@ -84,6 +84,11 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        // Reads GOOGLE_MAPS_API_KEY from android/gradle.properties or
+        // ~/.gradle/gradle.properties. See the README for setup.
+        manifestPlaceholders = [
+            googleMapsApiKey: project.findProperty("GOOGLE_MAPS_API_KEY") ?: ""
+        ]
     }
     signingConfigs {
         debug {

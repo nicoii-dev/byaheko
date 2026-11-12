@@ -1,4 +1,6 @@
-import { Favorite } from "../../types";
+import type { Favorite } from '../../types';
+import { environment } from '../../config/environment';
+import api from './client';
 
 export interface IFavoritesApi {
   getFavorites(): Promise<Favorite[]>;
@@ -8,12 +10,12 @@ export interface IFavoritesApi {
 
 export class FavoritesApi implements IFavoritesApi {
   async getFavorites(): Promise<Favorite[]> {
-    const response = await api.get("/favorites");
+    const response = await api.get<Favorite[]>('/favorites');
     return response.data;
   }
 
   async addFavorite(favorite: Favorite): Promise<void> {
-    await api.post("/favorites", favorite);
+    await api.post('/favorites', favorite);
   }
 
   async removeFavorite(id: string): Promise<void> {
@@ -21,24 +23,22 @@ export class FavoritesApi implements IFavoritesApi {
   }
 }
 
-export class MockFavoritesApi implements IFavoritesApi {
+class MockFavoritesApi implements IFavoritesApi {
   private favorites: Favorite[] = [];
 
   async getFavorites(): Promise<Favorite[]> {
-    await new Promise<void>((resolve) => setTimeout(resolve, 300));
     return this.favorites;
   }
 
   async addFavorite(favorite: Favorite): Promise<void> {
-    await new Promise<void>((resolve) => setTimeout(resolve, 300));
     this.favorites.push(favorite);
   }
 
   async removeFavorite(id: string): Promise<void> {
-    await new Promise<void>((resolve) => setTimeout(resolve, 300));
-    this.favorites = this.favorites.filter((f) => f.id !== id);
+    this.favorites = this.favorites.filter(item => item.id !== id);
   }
 }
 
-import api from "./index";
-export const favoritesApi: IFavoritesApi = new MockFavoritesApi();
+export const favoritesApi: IFavoritesApi = environment.enableMockServices
+  ? new MockFavoritesApi()
+  : new FavoritesApi();
