@@ -58,6 +58,14 @@ export const RegisterScreen = ({ navigation }: Props) => {
   const onSubmit = async (data: RegisterFormData) => {
     const result = await dispatch(register(data));
     if (register.rejected.match(result)) {
+      // The account exists even if the verification email could not be sent.
+      // Let the user request another code from the verification screen.
+      if (/account was created/i.test(result.payload ?? '')) {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'VerifyEmail', params: { email: data.email } }],
+        });
+      }
       return;
     }
     navigation.reset({

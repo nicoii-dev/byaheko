@@ -19,6 +19,8 @@ import LocationSearchScreen from '../features/routes/screens/LocationSearchScree
 import RouteDetailsScreen from '../features/routes/screens/RouteDetailsScreen';
 import NavigationScreen from '../features/routes/screens/NavigationScreen';
 import BoardingPointDetailsScreen from '../features/routes/screens/BoardingPointDetailsScreen';
+import TransportationDirectoryScreen from '../features/directory/screens/TransportationDirectoryScreen';
+import TransportationCategoryDetailsScreen from '../features/directory/screens/TransportationCategoryDetailsScreen';
 import NotificationsScreen from '../features/notifications/screens/NotificationsScreen';
 import EditProfileScreen from '../features/profile/screens/EditProfileScreen';
 import SettingsScreen from '../features/profile/screens/SettingsScreen';
@@ -87,6 +89,14 @@ export const AppNavigator = () => {
         <Stack.Screen
           name="BoardingPointDetails"
           component={BoardingPointDetailsScreen}
+        />
+        <Stack.Screen
+          name="TransportationDirectory"
+          component={TransportationDirectoryScreen}
+        />
+        <Stack.Screen
+          name="TransportationCategoryDetails"
+          component={TransportationCategoryDetailsScreen}
         />
         <Stack.Screen
           name="Notifications"

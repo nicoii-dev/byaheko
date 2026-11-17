@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -17,6 +17,7 @@ import DemoBanner from '../../../components/common/DemoBanner';
 import AppButton from '../../../components/buttons/AppButton';
 import { EmptyState } from '../../../components/common/StateViews';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 import {
   addRecentSearch,
   clearRecentSearches,
@@ -52,44 +53,56 @@ export const LocationSearchScreen = ({ navigation, route }: Props) => {
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const debouncedQuery = useDebouncedValue(query, 300);
+  const latestQuery = useRef(query);
+
   useEffect(() => {
-    const trimmed = query.trim();
-    if (trimmed.length < 1) {
+    latestQuery.current = query;
+    if (query.trim().length === 0) {
       setResults([]);
       setSearching(false);
+    } else {
+      setSearching(true);
+    }
+  }, [query]);
+
+  useEffect(() => {
+    const trimmed = debouncedQuery.trim();
+    if (trimmed.length === 0) {
       return;
     }
 
     let active = true;
-    setSearching(true);
-    const timeout = setTimeout(async () => {
-      try {
-        const found = await dispatch(searchPlaces(trimmed)).unwrap();
-        if (active) {
-          setResults(found);
-          setError(null);
+    dispatch(searchPlaces(trimmed))
+      .unwrap()
+      .then(found => {
+        if (!active || latestQuery.current.trim() !== trimmed) {
+          return;
         }
-      } catch (searchError) {
-        if (active) {
-          setResults([]);
-          setError(
-            typeof searchError === 'string'
-              ? searchError
-              : 'Place search failed. Please try again.',
-          );
+        setResults(found);
+        setError(null);
+      })
+      .catch(searchError => {
+        if (!active || latestQuery.current.trim() !== trimmed) {
+          return;
         }
-      } finally {
-        if (active) {
+        setResults([]);
+        setError(
+          typeof searchError === 'string'
+            ? searchError
+            : 'Place search failed. Please try again.',
+        );
+      })
+      .finally(() => {
+        if (active && latestQuery.current.trim() === trimmed) {
           setSearching(false);
         }
-      }
-    }, 300);
+      });
 
     return () => {
       active = false;
-      clearTimeout(timeout);
     };
-  }, [dispatch, query]);
+  }, [debouncedQuery, dispatch]);
 
   const finish = useCallback(() => {
     if (returnTo === 'planner') {

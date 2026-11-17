@@ -6,7 +6,11 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../../../config/theme';
 import Screen from '../../../components/common/Screen';
 import ScreenHeader from '../../../components/common/ScreenHeader';
-import { EmptyState, LoadingState } from '../../../components/common/StateViews';
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from '../../../components/common/StateViews';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import {
   loadNotifications,
@@ -37,7 +41,7 @@ const iconForType = (type: AppNotification['type']): string => {
 export const NotificationsScreen = ({ navigation }: Props) => {
   const theme = useAppTheme();
   const dispatch = useAppDispatch();
-  const { items, loading, unreadCount } = useAppSelector(
+  const { items, loading, error, unreadCount } = useAppSelector(
     state => state.notifications,
   );
 
@@ -96,6 +100,11 @@ export const NotificationsScreen = ({ navigation }: Props) => {
 
         {loading && items.length === 0 ? (
           <LoadingState message="Loading notifications…" />
+        ) : error && items.length === 0 ? (
+          <ErrorState
+            message={error}
+            onRetry={() => dispatch(loadNotifications())}
+          />
         ) : items.length === 0 ? (
           <EmptyState
             icon="bell-check-outline"

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -9,12 +9,13 @@ import ScreenHeader from '../../../components/common/ScreenHeader';
 import DemoBanner from '../../../components/common/DemoBanner';
 import AppButton from '../../../components/buttons/AppButton';
 import TransportBadge from '../../../components/common/TransportBadge';
-import TransportMap from '../../../components/maps/TransportMap';
+import OpenStreetMap from '../../../components/maps/OpenStreetMap';
+import RouteListCard from '../../../components/cards/RouteListCard';
 import { EmptyState } from '../../../components/common/StateViews';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setSelectedOrigin } from '../../../redux/slices/locationSlice';
 import { addFavorite, removeFavorite } from '../../../redux/slices/favoritesSlice';
-import { formatDuration, formatFare, haversineDistance } from '../../../utils/geo';
+import { haversineDistance } from '../../../utils/geo';
 import type { RootStackParamList } from '../../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'BoardingPointDetails'>;
@@ -118,7 +119,7 @@ export const BoardingPointDetailsScreen = ({ navigation, route }: Props) => {
       >
         <DemoBanner />
 
-        <TransportMap
+        <OpenStreetMap
           center={point}
           boardingPoints={[point]}
           selectedBoardingPointId={point.id}
@@ -203,46 +204,13 @@ export const BoardingPointDetailsScreen = ({ navigation, route }: Props) => {
         {servedRoutes.length > 0 ? (
           <View style={styles.routeList}>
             {servedRoutes.map(item => (
-              <TouchableOpacity
+              <RouteListCard
                 key={item.id}
+                route={item}
                 onPress={() =>
                   navigation.navigate('RouteDetails', { routeId: item.id })
                 }
-                style={[
-                  styles.routeRow,
-                  {
-                    backgroundColor: theme.colors.surface,
-                    borderColor: theme.colors.outline,
-                  },
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel={`View ${item.routeName}`}
-              >
-                <View style={styles.routeBody}>
-                  <Text
-                    variant="titleSmall"
-                    style={{ color: theme.colors.onSurface }}
-                  >
-                    {item.routeCode} · {item.routeName}
-                  </Text>
-                  <Text
-                    variant="bodySmall"
-                    style={{ color: theme.colors.onSurfaceVariant }}
-                  >
-                    {formatDuration(item.estimatedDuration)} ·{' '}
-                    {formatFare(item.fare)}
-                  </Text>
-                </View>
-                <TransportBadge
-                  category={item.transportationType}
-                  compact
-                />
-                <MaterialCommunityIcons
-                  name="chevron-right"
-                  size={20}
-                  color={theme.colors.onSurfaceVariant}
-                />
-              </TouchableOpacity>
+              />
             ))}
           </View>
         ) : (
@@ -312,18 +280,6 @@ const styles = StyleSheet.create({
   },
   routeList: {
     gap: 8,
-  },
-  routeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 12,
-  },
-  routeBody: {
-    flex: 1,
-    gap: 2,
   },
 });
 

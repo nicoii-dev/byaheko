@@ -7,7 +7,7 @@ import { useAppTheme } from '../../../config/theme';
 import Screen from '../../../components/common/Screen';
 import ScreenHeader from '../../../components/common/ScreenHeader';
 import AppButton from '../../../components/buttons/AppButton';
-import TransportMap from '../../../components/maps/TransportMap';
+import OpenStreetMap from '../../../components/maps/OpenStreetMap';
 import TransportBadge from '../../../components/common/TransportBadge';
 import { EmptyState } from '../../../components/common/StateViews';
 import { useAppSelector } from '../../../redux/hooks';
@@ -124,7 +124,7 @@ export const NavigationScreen = ({ navigation, route }: Props) => {
           </Text>
         </View>
 
-        <TransportMap
+        <OpenStreetMap
           location={null}
           center={option.boardingPoint}
           boardingPoints={mapPoints}

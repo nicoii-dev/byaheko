@@ -13,6 +13,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../../../config/theme';
 import { APP_NAME, DEMO_ACCOUNT } from '../../../config/constants';
+import { environment } from '../../../config/environment';
 import Screen from '../../../components/common/Screen';
 import AppLogo from '../../../components/common/AppLogo';
 import AppButton from '../../../components/buttons/AppButton';
@@ -25,10 +26,11 @@ import type { RootStackParamList } from '../../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-export const LoginScreen = ({ navigation }: Props) => {
+export const LoginScreen = ({ navigation, route }: Props) => {
   const theme = useAppTheme();
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector(state => state.auth);
+  const verified = route.params?.verified === true;
 
   const {
     control,
@@ -37,7 +39,7 @@ export const LoginScreen = ({ navigation }: Props) => {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: yupResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: route.params?.email ?? '', password: '' },
   });
 
   useEffect(() => {
@@ -49,6 +51,12 @@ export const LoginScreen = ({ navigation }: Props) => {
   const onSubmit = async (data: LoginFormData) => {
     const result = await dispatch(login(data));
     if (login.rejected.match(result)) {
+      // The API returns 403 for an unverified account. Send the user to the
+      // code screen instead of leaving them stuck on the login form.
+      if (/verify your email/i.test(result.payload ?? '')) {
+        dispatch(clearAuthError());
+        navigation.navigate('VerifyEmail', { email: data.email });
+      }
       return;
     }
     if (!result.payload.user.isEmailVerified) {
@@ -89,6 +97,23 @@ export const LoginScreen = ({ navigation }: Props) => {
               Sign in to continue planning your journey with {APP_NAME}.
             </Text>
           </View>
+
+          {verified ? (
+            <View
+              style={[
+                styles.successBanner,
+                { backgroundColor: theme.colors.secondaryContainer },
+              ]}
+              accessibilityLiveRegion="polite"
+            >
+              <Text
+                variant="bodySmall"
+                style={{ color: theme.colors.onSecondaryContainer }}
+              >
+                Your email is verified. Sign in to continue.
+              </Text>
+            </View>
+          ) : null}
 
           {error ? (
             <View
@@ -146,19 +171,26 @@ export const LoginScreen = ({ navigation }: Props) => {
             icon="login"
           />
 
-          <AppButton
-            label="Use demo account"
-            onPress={fillDemoAccount}
-            mode="outlined"
-            icon="account-demo"
-            style={styles.demoButton}
-          />
-          <Text
-            variant="labelSmall"
-            style={[styles.demoHint, { color: theme.colors.onSurfaceVariant }]}
-          >
-            Demo: {DEMO_ACCOUNT.email} / {DEMO_ACCOUNT.password}
-          </Text>
+          {environment.enableMockServices ? (
+            <>
+              <AppButton
+                label="Use demo account"
+                onPress={fillDemoAccount}
+                mode="outlined"
+                icon="account-demo"
+                style={styles.demoButton}
+              />
+              <Text
+                variant="labelSmall"
+                style={[
+                  styles.demoHint,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                Demo: {DEMO_ACCOUNT.email} / {DEMO_ACCOUNT.password}
+              </Text>
+            </>
+          ) : null}
 
           <View style={styles.footer}>
             <Text
@@ -207,6 +239,11 @@ const styles = StyleSheet.create({
     lineHeight: 21,
   },
   errorBanner: {
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  successBanner: {
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,

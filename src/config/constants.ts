@@ -6,6 +6,7 @@ export const APP_VERSION = '1.0.0';
 
 export const STORAGE_KEYS = {
   AUTH_TOKEN: '@ByaheKo/auth_token',
+  AUTH_REFRESH_TOKEN: '@ByaheKo/auth_refresh_token',
   USER_DATA: '@ByaheKo/user_data',
   THEME: '@ByaheKo/theme',
   FAVORITES: '@ByaheKo/favorites',
@@ -44,19 +45,19 @@ export const TRANSPORTATION_META: Record<
   TransportationCategory,
   TransportationMeta
 > = {
-  jeepney: { label: 'Jeepney', icon: 'bus-side', color: '#F5B942' },
+  jeepney: { label: 'Jeepney', icon: 'bus-side', color: '#FCCD10' },
   modern_jeepney: {
     label: 'Modern Jeepney',
     icon: 'bus-electric',
-    color: '#2E7D52',
+    color: '#0B63B8',
   },
-  multicab: { label: 'Multicab', icon: 'car-estate', color: '#3498DB' },
+  multicab: { label: 'Multicab', icon: 'car-estate', color: '#69CCFC' },
   tricycle: { label: 'Tricycle', icon: 'motorbike', color: '#E67E22' },
-  bus: { label: 'Bus', icon: 'bus', color: '#4A90D9' },
+  bus: { label: 'Bus', icon: 'bus', color: '#1E9EF9' },
   uv_express: { label: 'UV Express', icon: 'van-passenger', color: '#9B59B6' },
-  van: { label: 'Van', icon: 'van-utility', color: '#667085' },
+  van: { label: 'Van', icon: 'van-utility', color: '#506478' },
   ferry: { label: 'Ferry', icon: 'ferry', color: '#16A085' },
-  train: { label: 'Train', icon: 'train', color: '#34495E' },
+  train: { label: 'Train', icon: 'train', color: '#032865' },
 };
 
 export const TRANSPORTATION_CATEGORY_LIST: TransportationCategory[] = [
@@ -74,6 +75,18 @@ export const TRANSPORTATION_CATEGORY_LIST: TransportationCategory[] = [
 export const DEFAULT_MAP_DELTA = {
   latitudeDelta: 0.025,
   longitudeDelta: 0.025,
+} as const;
+
+/**
+ * OpenStreetMap tiles are free for light use, but their tile usage policy
+ * requires visible attribution. Use a dedicated tile provider for production
+ * traffic instead of relying on the community tile servers.
+ */
+export const OPENSTREETMAP = {
+  tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  attribution:
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19,
 } as const;
 
 /** Average walking pace used by the trip planner, in metres per minute. */

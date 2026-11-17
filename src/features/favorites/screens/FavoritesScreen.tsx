@@ -6,9 +6,16 @@ import { useAppTheme } from '../../../config/theme';
 import Screen from '../../../components/common/Screen';
 import ScreenHeader from '../../../components/common/ScreenHeader';
 import SegmentedControl from '../../../components/common/SegmentedControl';
-import { EmptyState, LoadingState } from '../../../components/common/StateViews';
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from '../../../components/common/StateViews';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { removeFavorite } from '../../../redux/slices/favoritesSlice';
+import {
+  loadFavorites,
+  removeFavorite,
+} from '../../../redux/slices/favoritesSlice';
 import { setSelectedDestination } from '../../../redux/slices/locationSlice';
 import { useAppNavigation } from '../../../navigation/useAppNavigation';
 import { formatRelativeTime } from '../../../utils/geo';
@@ -67,7 +74,7 @@ export const FavoritesScreen = () => {
   const navigation = useAppNavigation();
   const [filter, setFilter] = useState<Filter>('all');
 
-  const { items, loading } = useAppSelector(state => state.favorites);
+  const { items, loading, error } = useAppSelector(state => state.favorites);
 
   const filtered = useMemo(
     () =>
@@ -117,6 +124,11 @@ export const FavoritesScreen = () => {
       >
         {loading && items.length === 0 ? (
           <LoadingState message="Loading your favorites…" />
+        ) : error && items.length === 0 ? (
+          <ErrorState
+            message={error}
+            onRetry={() => dispatch(loadFavorites())}
+          />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon="heart-outline"

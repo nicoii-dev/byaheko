@@ -8,6 +8,6 @@
 module.exports = {
   assets: [
     './src/assets/fonts',
-    './node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf',
+    './node_modules/react-native-vector-icons/Fonts',
   ],
 };

@@ -30,7 +30,13 @@ describe('auth reducer', () => {
     state = authReducer(
       state,
       login.fulfilled(
-        { user, token: 'token_1' },
+        {
+          user,
+          tokens: {
+            accessToken: 'token_1',
+            refreshToken: 'refresh_1',
+          },
+        },
         'request_1',
         { email: user.email, password: 'Password123!' },
       ),
@@ -38,14 +44,16 @@ describe('auth reducer', () => {
 
     expect(state.isAuthenticated).toBe(true);
     expect(state.user).toEqual(user);
-    expect(state.token).toBe('token_1');
+    expect(state.accessToken).toBe('token_1');
+    expect(state.refreshToken).toBe('refresh_1');
     expect(state.pendingVerificationEmail).toBeNull();
 
     state = authReducer(state, logout.fulfilled(undefined, 'request_2', undefined));
 
     expect(state.isAuthenticated).toBe(false);
     expect(state.user).toBeNull();
-    expect(state.token).toBeNull();
+    expect(state.accessToken).toBeNull();
+    expect(state.refreshToken).toBeNull();
   });
 
   it('marks the session as initialized when restore finds nothing', () => {
@@ -65,7 +73,13 @@ describe('auth reducer', () => {
     const state = authReducer(
       undefined,
       login.fulfilled(
-        { user: unverifiedUser, token: 'token_1' },
+        {
+          user: unverifiedUser,
+          tokens: {
+            accessToken: 'token_1',
+            refreshToken: 'refresh_1',
+          },
+        },
         'request_1',
         { email: user.email, password: 'Password123!' },
       ),

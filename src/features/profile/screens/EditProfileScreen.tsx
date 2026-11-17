@@ -144,7 +144,8 @@ export const EditProfileScreen = ({ navigation }: Props) => {
               variant="labelSmall"
               style={{ color: theme.colors.onSurfaceVariant }}
             >
-              Email changes are not available in this demonstration build.
+              Email changes are not available here. Contact support if you need
+              to update it.
             </Text>
           </View>
 

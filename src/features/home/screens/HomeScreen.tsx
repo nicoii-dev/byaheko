@@ -1,14 +1,12 @@
 import React, { useCallback, useEffect } from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../../config/theme';
-import { APP_NAME, TRANSPORTATION_CATEGORY_LIST } from '../../../config/constants';
+import {
+  APP_NAME,
+  TRANSPORTATION_CATEGORY_LIST,
+} from '../../../config/constants';
 import Screen from '../../../components/common/Screen';
 import AppSearchInput from '../../../components/inputs/AppSearchInput';
 import DemoBanner from '../../../components/common/DemoBanner';
@@ -19,9 +17,7 @@ import PopularRouteCard from '../../../components/cards/PopularRouteCard';
 import AnnouncementCard from '../../../components/cards/AnnouncementCard';
 import { EmptyState } from '../../../components/common/StateViews';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import {
-  getCurrentLocation,
-} from '../../../redux/slices/locationSlice';
+import { getCurrentLocation } from '../../../redux/slices/locationSlice';
 import {
   loadNearbyBoardingPoints,
   loadTransportationData,
@@ -62,9 +58,7 @@ export const HomeScreen = () => {
   );
   const locationLoading = useAppSelector(state => state.location.loading);
   const locationError = useAppSelector(state => state.location.error);
-  const unreadCount = useAppSelector(
-    state => state.notifications.unreadCount,
-  );
+  const unreadCount = useAppSelector(state => state.notifications.unreadCount);
   const notificationEnabled = useAppSelector(
     state => state.settings.notificationEnabled,
   );
@@ -97,14 +91,14 @@ export const HomeScreen = () => {
     });
   };
 
-  const openCategory = (category: (typeof TRANSPORTATION_CATEGORY_LIST)[number]) => {
+  const openCategory = (
+    category: (typeof TRANSPORTATION_CATEGORY_LIST)[number],
+  ) => {
     dispatch(setSelectedCategory(category));
     navigation.navigate('Main', { screen: 'Explore' });
   };
 
-  const pointsToShow = currentLocation
-    ? nearbyBoardingPoints
-    : boardingPoints;
+  const pointsToShow = currentLocation ? nearbyBoardingPoints : boardingPoints;
 
   return (
     <Screen edges={['top']}>
@@ -144,10 +138,7 @@ export const HomeScreen = () => {
             />
             {notificationEnabled && unreadCount > 0 ? (
               <View
-                style={[
-                  styles.badge,
-                  { backgroundColor: theme.colors.error },
-                ]}
+                style={[styles.badge, { backgroundColor: theme.colors.error }]}
               >
                 <Text style={styles.badgeText}>
                   {unreadCount > 9 ? '9+' : unreadCount}
@@ -257,6 +248,8 @@ export const HomeScreen = () => {
         <SectionHeader
           title="Transportation"
           subtitle="Explore the vehicle types in this build"
+          actionLabel="Directory"
+          onAction={() => navigation.navigate('TransportationDirectory')}
         />
         <ScrollView
           horizontal
@@ -274,7 +267,9 @@ export const HomeScreen = () => {
 
         <View style={styles.section}>
           <SectionHeader
-            title={currentLocation ? 'Nearby boarding points' : 'Boarding points'}
+            title={
+              currentLocation ? 'Nearby boarding points' : 'Boarding points'
+            }
             subtitle={
               currentLocation
                 ? 'Within 3 km of your location'
@@ -314,7 +309,9 @@ export const HomeScreen = () => {
                 'Try refreshing your location or browse the full map in Explore.'
               }
               actionLabel="Open Explore"
-              onAction={() => navigation.navigate('Main', { screen: 'Explore' })}
+              onAction={() =>
+                navigation.navigate('Main', { screen: 'Explore' })
+              }
             />
           )}
         </View>
@@ -345,7 +342,9 @@ export const HomeScreen = () => {
           ))}
         </View>
 
-        <View style={styles.planCard}>
+        <View
+          style={[styles.planCard, { backgroundColor: theme.colors.primary }]}
+        >
           <View style={styles.planText}>
             <Text
               variant="titleMedium"
@@ -362,14 +361,17 @@ export const HomeScreen = () => {
           </View>
           <TouchableOpacity
             onPress={() => navigation.navigate('Main', { screen: 'PlanTrip' })}
-            style={styles.planButton}
+            style={[
+              styles.planButton,
+              { backgroundColor: theme.colors.secondary },
+            ]}
             accessibilityRole="button"
             accessibilityLabel="Plan a trip"
           >
             <MaterialCommunityIcons
               name="arrow-right"
               size={22}
-              color={theme.colors.primary}
+              color={theme.colors.onSecondary}
             />
           </TouchableOpacity>
         </View>
@@ -476,7 +478,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#163D32',
     borderRadius: 18,
     padding: 16,
     marginTop: 28,
@@ -495,7 +496,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#B8E65A',
     alignItems: 'center',
     justifyContent: 'center',
   },

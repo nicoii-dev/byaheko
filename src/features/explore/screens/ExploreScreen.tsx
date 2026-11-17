@@ -18,7 +18,7 @@ import ScreenHeader from '../../../components/common/ScreenHeader';
 import DemoBanner from '../../../components/common/DemoBanner';
 import CategoryCard from '../../../components/cards/CategoryCard';
 import BoardingPointCard from '../../../components/cards/BoardingPointCard';
-import TransportMap from '../../../components/maps/TransportMap';
+import OpenStreetMap from '../../../components/maps/OpenStreetMap';
 import { EmptyState, ErrorState, LoadingState } from '../../../components/common/StateViews';
 import AppButton from '../../../components/buttons/AppButton';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
@@ -130,7 +130,7 @@ export const ExploreScreen = () => {
         <DemoBanner />
 
         <View style={styles.mapWrap}>
-          <TransportMap
+          <OpenStreetMap
             location={currentLocation}
             boardingPoints={points}
             selectedBoardingPointId={selectedId}
@@ -228,6 +228,44 @@ export const ExploreScreen = () => {
             />
           ))}
         </ScrollView>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate('TransportationDirectory')}
+          style={[
+            styles.directoryLink,
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.outline,
+            },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Browse the transportation directory"
+        >
+          <MaterialCommunityIcons
+            name="view-grid-outline"
+            size={20}
+            color={theme.colors.primary}
+          />
+          <View style={styles.directoryText}>
+            <Text
+              variant="titleSmall"
+              style={{ color: theme.colors.onSurface }}
+            >
+              Transportation directory
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={{ color: theme.colors.onSurfaceVariant }}
+            >
+              Compare vehicle types, routes, and fare ranges.
+            </Text>
+          </View>
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={22}
+            color={theme.colors.onSurfaceVariant}
+          />
+        </TouchableOpacity>
 
         <View style={styles.listHeader}>
           <Text
@@ -384,6 +422,19 @@ const styles = StyleSheet.create({
   filterRow: {
     gap: 8,
     paddingBottom: 4,
+  },
+  directoryLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 12,
+    marginTop: 12,
+  },
+  directoryText: {
+    flex: 1,
+    gap: 1,
   },
   listHeader: {
     flexDirection: 'row',

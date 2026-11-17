@@ -16,6 +16,19 @@ export type TransportationCategory =
   | 'ferry'
   | 'train';
 
+export type UserStatus =
+  | 'ACTIVE'
+  | 'INACTIVE'
+  | 'SUSPENDED'
+  | 'PENDING_VERIFICATION'
+  | 'DELETED';
+
+export type UserRole =
+  | 'SUPER_ADMIN'
+  | 'ADMIN'
+  | 'TRANSPORT_OPERATOR'
+  | 'COMMUTER';
+
 export type RouteStatus = 'active' | 'inactive' | 'suspended';
 
 export type StopType = 'boarding' | 'dropoff' | 'transfer' | 'terminal';
@@ -140,8 +153,14 @@ export interface User {
   email: string;
   mobileNumber: string;
   avatar?: string;
+  /** Convenience flag derived from `status`/`emailVerifiedAt` by the API mapper. */
   isEmailVerified: boolean;
+  status?: UserStatus;
+  role?: UserRole;
+  emailVerifiedAt?: string | null;
+  lastLoginAt?: string | null;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Favorite {
@@ -196,9 +215,36 @@ export interface AuthRegistration {
   confirmPassword: string;
 }
 
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+/** Result of a successful sign-in or token rotation. */
 export interface AuthResponse {
   user: User;
-  token: string;
+  tokens: AuthTokens;
+}
+
+/** Metadata returned when the API emails a 6-digit code. */
+export interface VerificationChallenge {
+  email: string;
+  expiresAt: string;
+  expiresInSeconds: number;
+  codeLength: number;
+  resendAvailableInSeconds: number;
+}
+
+/** Registration creates the account but does not sign the user in yet. */
+export interface RegistrationResult {
+  user: User;
+  verification: VerificationChallenge;
+}
+
+/** Verifying an email activates the account; the user then signs in. */
+export interface VerificationResult {
+  user: User;
+  verified: true;
 }
 
 export interface UpdateProfileInput {
@@ -209,7 +255,8 @@ export interface UpdateProfileInput {
 
 export interface AuthState {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
   isInitialized: boolean;
   loading: boolean;

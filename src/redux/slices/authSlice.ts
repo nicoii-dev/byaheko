@@ -4,17 +4,22 @@ import type {
   AuthRegistration,
   AuthResponse,
   AuthState,
+  RegistrationResult,
   UpdateProfileInput,
   User,
+  VerificationChallenge,
+  VerificationResult,
 } from '../../types';
 import { STORAGE_KEYS } from '../../config/constants';
 import { storage } from '../../services/storage';
+import sessionStorage from '../../services/api/session';
 import { authApi } from '../../services/api/authApi';
 import { getErrorMessage } from '../../utils/errors';
 
 const initialState: AuthState = {
   user: null,
-  token: null,
+  accessToken: null,
+  refreshToken: null,
   isAuthenticated: false,
   isInitialized: false,
   loading: false,
@@ -23,8 +28,13 @@ const initialState: AuthState = {
 };
 
 const persistSession = async (response: AuthResponse): Promise<void> => {
-  await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.token);
+  await sessionStorage.saveTokens(response.tokens);
   await storage.setJson(STORAGE_KEYS.USER_DATA, response.user);
+};
+
+const clearSession = async (): Promise<void> => {
+  await sessionStorage.clearTokens();
+  await storage.removeItem(STORAGE_KEYS.USER_DATA);
 };
 
 export const restoreSession = createAsyncThunk<
@@ -33,14 +43,24 @@ export const restoreSession = createAsyncThunk<
   { rejectValue: string }
 >('auth/restoreSession', async (_, { rejectWithValue }) => {
   try {
-    const token = await storage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-    const user = await storage.getJson<User>(STORAGE_KEYS.USER_DATA);
-    if (!token || !user) {
+    const [accessToken, refreshToken, user] = await Promise.all([
+      sessionStorage.getAccessToken(),
+      sessionStorage.getRefreshToken(),
+      storage.getJson<User>(STORAGE_KEYS.USER_DATA),
+    ]);
+
+    if (!accessToken || !user) {
       return null;
     }
-    return { token, user };
+
+    return {
+      user,
+      tokens: { accessToken, refreshToken: refreshToken ?? '' },
+    };
   } catch (error) {
-    return rejectWithValue(getErrorMessage(error, 'Unable to restore session.'));
+    return rejectWithValue(
+      getErrorMessage(error, 'Unable to restore session.'),
+    );
   }
 });
 
@@ -59,28 +79,24 @@ export const login = createAsyncThunk<
 });
 
 export const register = createAsyncThunk<
-  AuthResponse,
+  RegistrationResult,
   AuthRegistration,
   { rejectValue: string }
 >('auth/register', async (registration, { rejectWithValue }) => {
   try {
-    const response = await authApi.register(registration);
-    await persistSession(response);
-    return response;
+    return await authApi.register(registration);
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Registration failed.'));
   }
 });
 
 export const verifyEmail = createAsyncThunk<
-  AuthResponse,
+  VerificationResult,
   { email: string; code: string },
   { rejectValue: string }
 >('auth/verifyEmail', async ({ email, code }, { rejectWithValue }) => {
   try {
-    const response = await authApi.verifyEmail(email, code);
-    await persistSession(response);
-    return response;
+    return await authApi.verifyEmail(email, code);
   } catch (error) {
     return rejectWithValue(
       getErrorMessage(error, 'Email verification failed.'),
@@ -89,12 +105,12 @@ export const verifyEmail = createAsyncThunk<
 });
 
 export const resendVerification = createAsyncThunk<
-  void,
+  VerificationChallenge,
   string,
   { rejectValue: string }
 >('auth/resendVerification', async (email, { rejectWithValue }) => {
   try {
-    await authApi.resendVerification(email);
+    return await authApi.resendVerification(email);
   } catch (error) {
     return rejectWithValue(
       getErrorMessage(error, 'Unable to resend the verification code.'),
@@ -103,12 +119,12 @@ export const resendVerification = createAsyncThunk<
 });
 
 export const requestPasswordReset = createAsyncThunk<
-  void,
+  VerificationChallenge,
   string,
   { rejectValue: string }
 >('auth/requestPasswordReset', async (email, { rejectWithValue }) => {
   try {
-    await authApi.requestPasswordReset(email);
+    return await authApi.requestPasswordReset(email);
   } catch (error) {
     return rejectWithValue(
       getErrorMessage(error, 'Unable to send the reset code.'),
@@ -158,8 +174,7 @@ export const logout = createAsyncThunk<void, void>(
     } catch {
       // Local sign-out must succeed even if the network request fails.
     } finally {
-      await storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-      await storage.removeItem(STORAGE_KEYS.USER_DATA);
+      await clearSession();
     }
   },
 );
@@ -185,7 +200,8 @@ const authSlice = createSlice({
         state.isInitialized = true;
         if (action.payload) {
           state.user = action.payload.user;
-          state.token = action.payload.token;
+          state.accessToken = action.payload.tokens.accessToken;
+          state.refreshToken = action.payload.tokens.refreshToken;
           state.isAuthenticated = true;
           state.pendingVerificationEmail = action.payload.user.isEmailVerified
             ? null
@@ -204,7 +220,8 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.accessToken = action.payload.tokens.accessToken;
+        state.refreshToken = action.payload.tokens.refreshToken;
         state.isAuthenticated = true;
         state.pendingVerificationEmail = action.payload.user.isEmailVerified
           ? null
@@ -220,12 +237,9 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        state.isAuthenticated = true;
-        state.pendingVerificationEmail = action.payload.user.isEmailVerified
-          ? null
-          : action.payload.user.email;
+        // Registration only creates the account. The user is signed in after
+        // verifying their email and logging in.
+        state.pendingVerificationEmail = action.payload.user.email;
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
@@ -235,11 +249,8 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(verifyEmail.fulfilled, (state, action) => {
+      .addCase(verifyEmail.fulfilled, state => {
         state.loading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        state.isAuthenticated = true;
         state.pendingVerificationEmail = null;
       })
       .addCase(verifyEmail.rejected, (state, action) => {
@@ -293,7 +304,8 @@ const authSlice = createSlice({
       })
       .addCase(logout.fulfilled, state => {
         state.user = null;
-        state.token = null;
+        state.accessToken = null;
+        state.refreshToken = null;
         state.isAuthenticated = false;
         state.pendingVerificationEmail = null;
         state.error = null;

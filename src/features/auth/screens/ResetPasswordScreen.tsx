@@ -164,7 +164,7 @@ export const ResetPasswordScreen = ({ navigation, route }: Props) => {
             keyboardType="number-pad"
             maxLength={6}
             leftIcon="numeric"
-            helperText="Demo build code: 123456"
+            helperText="Enter the 6-digit code from your email"
             error={errors.code?.message}
           />
 

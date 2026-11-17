@@ -1,5 +1,21 @@
 export { default as api } from './client';
 export { authApi, type IAuthApi } from './authApi';
+export { default as sessionStorage } from './session';
+export {
+  mapApiUser,
+  mapAuthResult,
+  mapRegistrationResult,
+  mapVerificationChallenge,
+  mapVerificationResult,
+} from './authMapper';
+export type {
+  ApiAuthResult,
+  ApiEnvelope,
+  ApiErrorBody,
+  ApiRegistrationResult,
+  ApiUser,
+  ApiVerificationResult,
+} from './types';
 export {
   transportationApi,
   type ITransportationApi,

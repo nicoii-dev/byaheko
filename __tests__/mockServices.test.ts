@@ -13,7 +13,10 @@ describe('mock auth service', () => {
         password: 'Password123!',
       }),
     ).resolves.toMatchObject({
-      token: expect.stringContaining('mock_token_'),
+      tokens: {
+        accessToken: expect.stringContaining('mock_access_token_'),
+        refreshToken: expect.stringContaining('mock_refresh_token_'),
+      },
       user: { email: 'juan@example.com', isEmailVerified: true },
     });
   });
@@ -43,12 +46,14 @@ describe('mock auth service', () => {
       }),
     ).resolves.toMatchObject({
       user: { email: 'maria@example.com', isEmailVerified: false },
+      verification: { email: 'maria@example.com', codeLength: 6 },
     });
 
     await expect(
       api.verifyEmail('maria@example.com', '123456'),
     ).resolves.toMatchObject({
       user: { email: 'maria@example.com', isEmailVerified: true },
+      verified: true,
     });
   });
 });

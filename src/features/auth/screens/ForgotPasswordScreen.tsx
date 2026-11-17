@@ -84,7 +84,7 @@ export const ForgotPasswordScreen = ({ navigation }: Props) => {
             style={[styles.successMessage, { color: theme.colors.onSurfaceVariant }]}
           >
             If {submittedEmail} is registered, a 6-digit reset code has been
-            sent. In this demonstration build the code is 123456.
+            sent. Enter the code on the next screen to choose a new password.
           </Text>
           <AppButton
             label="Enter reset code"

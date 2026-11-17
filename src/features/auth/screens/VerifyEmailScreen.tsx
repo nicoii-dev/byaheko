@@ -58,7 +58,10 @@ export const VerifyEmailScreen = ({ navigation, route }: Props) => {
       verifyEmail({ email, code: data.code }),
     );
     if (verifyEmail.fulfilled.match(result)) {
-      navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login', params: { verified: true, email } }],
+      });
     }
   };
 
@@ -136,7 +139,7 @@ export const VerifyEmailScreen = ({ navigation, route }: Props) => {
                 variant="bodySmall"
                 style={{ color: theme.colors.onSecondaryContainer }}
               >
-                A new code has been sent. Demo code: 123456.
+                A new code has been sent to {email}.
               </Text>
             </View>
           ) : null}
@@ -149,7 +152,7 @@ export const VerifyEmailScreen = ({ navigation, route }: Props) => {
             keyboardType="number-pad"
             maxLength={6}
             leftIcon="numeric"
-            helperText="Demo build code: 123456"
+            helperText="Enter the 6-digit code from your email"
             error={errors.code?.message}
           />
 

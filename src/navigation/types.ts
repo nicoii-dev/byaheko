@@ -1,6 +1,7 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { TransportationCategory } from '../types';
 
 export type MainTabParamList = {
   Home: undefined;
@@ -13,7 +14,7 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
-  Login: undefined;
+  Login: { verified?: boolean; email?: string } | undefined;
   Register: undefined;
   ForgotPassword: undefined;
   ResetPassword: { email: string };
@@ -27,6 +28,8 @@ export type RootStackParamList = {
   RouteDetails: { optionId?: string; routeId?: string } | undefined;
   Navigation: { optionId?: string } | undefined;
   BoardingPointDetails: { boardingPointId: string };
+  TransportationDirectory: undefined;
+  TransportationCategoryDetails: { category: TransportationCategory };
   Notifications: undefined;
   EditProfile: undefined;
   Settings: undefined;
