@@ -1,5 +1,11 @@
 import React from 'react';
-import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Switch, Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../../config/theme';
@@ -20,7 +26,13 @@ interface MenuRowProps {
   destructive?: boolean;
 }
 
-const MenuRow = ({ icon, label, onPress, badge, destructive }: MenuRowProps) => {
+const MenuRow = ({
+  icon,
+  label,
+  onPress,
+  badge,
+  destructive,
+}: MenuRowProps) => {
   const theme = useAppTheme();
   return (
     <TouchableOpacity
@@ -58,9 +70,7 @@ const MenuRow = ({ icon, label, onPress, badge, destructive }: MenuRowProps) => 
         {label}
       </Text>
       {badge && badge > 0 ? (
-        <View
-          style={[styles.badge, { backgroundColor: theme.colors.error }]}
-        >
+        <View style={[styles.badge, { backgroundColor: theme.colors.error }]}>
           <Text style={styles.badgeText}>{badge > 9 ? '9+' : badge}</Text>
         </View>
       ) : null}
@@ -79,9 +89,7 @@ export const ProfileScreen = () => {
   const navigation = useAppNavigation();
   const user = useAppSelector(state => state.auth.user);
   const themeMode = useAppSelector(state => state.theme.mode);
-  const unreadCount = useAppSelector(
-    state => state.notifications.unreadCount,
-  );
+  const unreadCount = useAppSelector(state => state.notifications.unreadCount);
   const notificationEnabled = useAppSelector(
     state => state.settings.notificationEnabled,
   );
@@ -89,7 +97,7 @@ export const ProfileScreen = () => {
   const confirmLogout = () => {
     Alert.alert(
       'Sign out?',
-      'Your saved favorites will stay on this device.',
+      'Your saved favorites stay with your ByaheKo account.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -125,10 +133,7 @@ export const ProfileScreen = () => {
           ]}
         >
           <View
-            style={[
-              styles.avatar,
-              { backgroundColor: theme.colors.primary },
-            ]}
+            style={[styles.avatar, { backgroundColor: theme.colors.primary }]}
           >
             <Text
               variant="headlineSmall"
@@ -142,7 +147,9 @@ export const ProfileScreen = () => {
               variant="titleLarge"
               style={[styles.bold, { color: theme.colors.onSurface }]}
             >
-              {user ? `${user.firstName} ${user.lastName}` : 'ByaheKo traveller'}
+              {user
+                ? `${user.firstName} ${user.lastName}`
+                : 'ByaheKo traveller'}
             </Text>
             <Text
               variant="bodySmall"
@@ -180,7 +187,9 @@ export const ProfileScreen = () => {
                     : theme.colors.warning,
                 }}
               >
-                {user?.isEmailVerified ? 'Verified account' : 'Email not verified'}
+                {user?.isEmailVerified
+                  ? 'Verified account'
+                  : 'Email not verified'}
               </Text>
             </View>
           </View>
@@ -213,6 +222,14 @@ export const ProfileScreen = () => {
             style={[styles.divider, { backgroundColor: theme.colors.outline }]}
           />
           <MenuRow
+            icon="bus-clock"
+            label="Transport info"
+            onPress={() => navigation.navigate('TransportInfo')}
+          />
+          <View
+            style={[styles.divider, { backgroundColor: theme.colors.outline }]}
+          />
+          <MenuRow
             icon="cog-outline"
             label="Settings"
             onPress={() => navigation.navigate('Settings')}
@@ -228,7 +245,9 @@ export const ProfileScreen = () => {
               ]}
             >
               <MaterialCommunityIcons
-                name={themeMode === 'dark' ? 'weather-night' : 'white-balance-sunny'}
+                name={
+                  themeMode === 'dark' ? 'weather-night' : 'white-balance-sunny'
+                }
                 size={20}
                 color={theme.colors.primary}
               />

@@ -10,6 +10,7 @@ import type {
 } from '../../types';
 import { environment } from '../../config/environment';
 import api from './client';
+import { requireData } from '../../utils/apiData';
 import {
   mapApiUser,
   mapAuthResult,
@@ -61,7 +62,7 @@ export interface IAuthApi {
 export class AuthApi implements IAuthApi {
   async login(credentials: AuthCredentials): Promise<AuthResponse> {
     const response = await api.post<ApiAuthResult>('/auth/login', credentials);
-    return mapAuthResult(response.data);
+    return mapAuthResult(requireData(response.data));
   }
 
   async register(data: AuthRegistration): Promise<RegistrationResult> {
@@ -72,18 +73,15 @@ export class AuthApi implements IAuthApi {
       mobileNumber: data.mobileNumber,
       password: data.password,
     });
-    return mapRegistrationResult(response.data);
+    return mapRegistrationResult(requireData(response.data));
   }
 
-  async verifyEmail(
-    email: string,
-    code: string,
-  ): Promise<VerificationResult> {
+  async verifyEmail(email: string, code: string): Promise<VerificationResult> {
     const response = await api.post<ApiVerificationResult>(
       '/auth/register/verify',
       { email, code },
     );
-    return mapVerificationResult(response.data);
+    return mapVerificationResult(requireData(response.data));
   }
 
   async resendVerification(email: string): Promise<VerificationChallenge> {
@@ -91,17 +89,15 @@ export class AuthApi implements IAuthApi {
       '/auth/register/resend',
       { email },
     );
-    return mapVerificationChallenge(response.data);
+    return mapVerificationChallenge(requireData(response.data));
   }
 
-  async requestPasswordReset(
-    email: string,
-  ): Promise<VerificationChallenge> {
+  async requestPasswordReset(email: string): Promise<VerificationChallenge> {
     const response = await api.post<ApiVerificationChallenge>(
       '/auth/forgot-password',
       { email },
     );
-    return mapVerificationChallenge(response.data);
+    return mapVerificationChallenge(requireData(response.data));
   }
 
   async resetPassword(
@@ -114,7 +110,7 @@ export class AuthApi implements IAuthApi {
 
   async updateProfile(input: UpdateProfileInput): Promise<User> {
     const response = await api.patch<ApiUser>('/users/me', input);
-    return mapApiUser(response.data);
+    return mapApiUser(requireData(response.data));
   }
 
   async logout(): Promise<void> {
@@ -123,14 +119,14 @@ export class AuthApi implements IAuthApi {
 
   async getCurrentUser(): Promise<User> {
     const response = await api.get<ApiUser>('/auth/me');
-    return mapApiUser(response.data);
+    return mapApiUser(requireData(response.data));
   }
 
   async refreshSession(refreshToken: string): Promise<AuthResponse> {
     const response = await api.post<ApiAuthResult>('/auth/refresh', {
       refreshToken,
     });
-    return mapAuthResult(response.data);
+    return mapAuthResult(requireData(response.data));
   }
 }
 

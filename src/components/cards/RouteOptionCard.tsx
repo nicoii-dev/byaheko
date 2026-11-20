@@ -33,7 +33,9 @@ export const RouteOptionCard = ({
         recommended ? styles.recommendedBorder : null,
         {
           backgroundColor: theme.colors.surface,
-          borderColor: recommended ? theme.colors.primary : theme.colors.outline,
+          borderColor: recommended
+            ? theme.colors.primary
+            : theme.colors.outline,
         },
       ]}
     >
@@ -106,10 +108,7 @@ export const RouteOptionCard = ({
             size={16}
             color={theme.colors.primary}
           />
-          <Text
-            variant="bodySmall"
-            style={{ color: theme.colors.onSurface }}
-          >
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurface }}>
             {formatDuration(option.estimatedTravelTime)}
           </Text>
         </View>
@@ -119,10 +118,7 @@ export const RouteOptionCard = ({
             size={16}
             color={theme.colors.primary}
           />
-          <Text
-            variant="bodySmall"
-            style={{ color: theme.colors.onSurface }}
-          >
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurface }}>
             {formatFare(option.estimatedFare)}
           </Text>
         </View>
@@ -132,10 +128,7 @@ export const RouteOptionCard = ({
             size={16}
             color={theme.colors.primary}
           />
-          <Text
-            variant="bodySmall"
-            style={{ color: theme.colors.onSurface }}
-          >
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurface }}>
             {option.transfers === 0
               ? 'Direct'
               : `${option.transfers} transfer${
@@ -149,10 +142,7 @@ export const RouteOptionCard = ({
             size={16}
             color={theme.colors.primary}
           />
-          <Text
-            variant="bodySmall"
-            style={{ color: theme.colors.onSurface }}
-          >
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurface }}>
             {formatDistance(option.walkingDistance)}
           </Text>
         </View>

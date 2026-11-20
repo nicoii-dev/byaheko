@@ -14,6 +14,15 @@ export class MockNotificationsApi {
     return this.notifications;
   }
 
+  async getNotification(id: string): Promise<AppNotification> {
+    await wait(150);
+    const notification = this.notifications.find(item => item.id === id);
+    if (!notification) {
+      throw new Error('Notification not found.');
+    }
+    return notification;
+  }
+
   async markRead(id: string): Promise<void> {
     await wait(150);
     this.notifications = this.notifications.map(item =>

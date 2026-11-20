@@ -22,7 +22,7 @@ const PRIVACY_SECTIONS: Section[] = [
   },
   {
     title: 'Location data',
-    body: 'Location permission is requested only when you ask the app to find nearby boarding points or use your current location. Coordinates are used to calculate distances and are not uploaded by this build.',
+    body: 'On a fresh install, before you sign in, ByaheKo asks whether you would like to use location. If you agree, the device permission dialog appears and your current coordinates are read. From then on the app quietly refreshes your location on each launch so nearby boarding points are shown automatically, without asking again. If you skip, the device permission is left untouched and you can still ask the app to find nearby boarding points or use your current location later. Coordinates are used to calculate distances and are not uploaded by this build.',
   },
   {
     title: 'Network requests',

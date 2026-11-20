@@ -8,8 +8,8 @@ import AppLogo from '../../../components/common/AppLogo';
 import Screen from '../../../components/common/Screen';
 import { useAppDispatch } from '../../../redux/hooks';
 import { restoreSession } from '../../../redux/slices/authSlice';
-import { loadFavorites } from '../../../redux/slices/favoritesSlice';
 import { loadSettings } from '../../../redux/slices/settingsSlice';
+import { restoreLocationAccess } from '../../../redux/slices/locationSlice';
 import { loadThemeMode } from '../../../redux/slices/themeSlice';
 import { STORAGE_KEYS } from '../../../config/constants';
 import { storage } from '../../../services/storage';
@@ -29,12 +29,16 @@ export const SplashScreen = ({ navigation }: Props) => {
     let active = true;
 
     const bootstrap = async () => {
+      // If the user approved location on first run, quietly re-acquire it for
+      // this session so nearby boarding points are available without another
+      // confirmation. Not awaited: GPS should never hold up app startup.
+      dispatch(restoreLocationAccess());
+
       const [sessionResult, onboardingSeen] = await Promise.all([
         dispatch(restoreSession()),
         storage.getItem(STORAGE_KEYS.ONBOARDING_SEEN),
         dispatch(loadThemeMode()),
         dispatch(loadSettings()),
-        dispatch(loadFavorites()),
       ]);
 
       // Keep the brand visible briefly so the transition does not flash.
@@ -53,7 +57,9 @@ export const SplashScreen = ({ navigation }: Props) => {
         } else {
           navigation.reset({
             index: 0,
-            routes: [{ name: 'VerifyEmail', params: { email: session.user.email } }],
+            routes: [
+              { name: 'VerifyEmail', params: { email: session.user.email } },
+            ],
           });
         }
         return;

@@ -1,8 +1,10 @@
 import type { Location } from '../../types';
 import { environment } from '../../config/environment';
 import api from './client';
+import { asList, requireData } from '../../utils/apiData';
 import { getDeviceLocation } from '../location/deviceLocation';
 import { MockLocationApi } from '../mock/locationApi';
+import { searchGeocoder } from './geocoding';
 
 export interface ILocationApi {
   getCurrentLocation(): Promise<Location>;
@@ -23,14 +25,23 @@ export class LocationApi implements ILocationApi {
     const response = await api.get<{ address: string }>('/geocode/reverse', {
       params: { latitude, longitude },
     });
-    return response.data.address;
+    return response.data?.address ?? '';
   }
 
   async searchPlaces(query: string): Promise<Location[]> {
-    const response = await api.get<Location[]>('/geocode/search', {
-      params: { query },
-    });
-    return response.data;
+    try {
+      const response = await api.get<Location[]>('/geocode/search', {
+        params: { query },
+      });
+      const results = asList(response.data);
+      if (results.length > 0) {
+        return results;
+      }
+    } catch {
+      // The backend geocoder is optional; fall through to the configured
+      // OpenStreetMap-based provider so destination search keeps working.
+    }
+    return searchGeocoder(query);
   }
 
   async getDirections(
@@ -48,7 +59,7 @@ export class LocationApi implements ILocationApi {
         },
       },
     );
-    return response.data;
+    return requireData(response.data);
   }
 }
 

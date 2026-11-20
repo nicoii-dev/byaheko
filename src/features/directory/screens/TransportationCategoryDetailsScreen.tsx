@@ -84,7 +84,7 @@ export const TransportationCategoryDetailsScreen = ({
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <DemoBanner />
+        <DemoBanner message="Boarding points are live from ByaheKo. Route and fare coverage for this vehicle type is still expanding." />
 
         {error && categories.length > 0 ? (
           <InfoBanner
@@ -126,7 +126,10 @@ export const TransportationCategoryDetailsScreen = ({
                 <View style={styles.heroText}>
                   <Text
                     variant="titleMedium"
-                    style={[styles.heroTitle, { color: theme.colors.onSurface }]}
+                    style={[
+                      styles.heroTitle,
+                      { color: theme.colors.onSurface },
+                    ]}
                   >
                     {meta.label}
                   </Text>
@@ -177,7 +180,10 @@ export const TransportationCategoryDetailsScreen = ({
 
             <Text
               variant="titleMedium"
-              style={[styles.sectionTitle, { color: theme.colors.onBackground }]}
+              style={[
+                styles.sectionTitle,
+                { color: theme.colors.onBackground },
+              ]}
             >
               Routes
             </Text>
@@ -203,7 +209,10 @@ export const TransportationCategoryDetailsScreen = ({
 
             <Text
               variant="titleMedium"
-              style={[styles.sectionTitle, { color: theme.colors.onBackground }]}
+              style={[
+                styles.sectionTitle,
+                { color: theme.colors.onBackground },
+              ]}
             >
               Boarding points
             </Text>

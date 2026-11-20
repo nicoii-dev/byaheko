@@ -1,8 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type {
-  AppNotification,
-  NotificationsState,
-} from '../../types';
+import type { AppNotification, NotificationsState } from '../../types';
 import { notificationsApi } from '../../services/api/notificationsApi';
 import { getErrorMessage } from '../../utils/errors';
 

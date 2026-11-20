@@ -9,12 +9,13 @@ import {
 } from '../../../config/constants';
 import Screen from '../../../components/common/Screen';
 import AppSearchInput from '../../../components/inputs/AppSearchInput';
-import DemoBanner from '../../../components/common/DemoBanner';
 import SectionHeader from '../../../components/common/SectionHeader';
 import CategoryCard from '../../../components/cards/CategoryCard';
 import BoardingPointCard from '../../../components/cards/BoardingPointCard';
 import PopularRouteCard from '../../../components/cards/PopularRouteCard';
-import AnnouncementCard from '../../../components/cards/AnnouncementCard';
+import AdvisoryCard from '../../../components/cards/AdvisoryCard';
+import FareCard from '../../../components/cards/FareCard';
+import ServiceAnnouncementCard from '../../../components/cards/ServiceAnnouncementCard';
 import { EmptyState } from '../../../components/common/StateViews';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { getCurrentLocation } from '../../../redux/slices/locationSlice';
@@ -24,6 +25,11 @@ import {
   setSelectedCategory,
 } from '../../../redux/slices/transportationSlice';
 import { loadRoutes } from '../../../redux/slices/routesSlice';
+import {
+  loadAdvisories,
+  loadAnnouncements,
+  loadFares,
+} from '../../../redux/slices/commuterDataSlice';
 import { useAppNavigation } from '../../../navigation/useAppNavigation';
 import { getDistanceMeters } from '../../../utils/geo';
 
@@ -49,13 +55,32 @@ export const HomeScreen = () => {
     boardingPoints,
     nearbyBoardingPoints,
     popularRoutes,
-    announcements,
     loading,
     error,
   } = useAppSelector(state => state.transportation);
+  const fares = useAppSelector(state => state.commuterData.fares.items);
+  const announcements = useAppSelector(
+    state => state.commuterData.announcements.items,
+  );
+  const advisories = useAppSelector(
+    state => state.commuterData.advisories.items,
+  );
+  const faresLoading = useAppSelector(
+    state => state.commuterData.fares.loading,
+  );
+  const updatesLoading = useAppSelector(
+    state =>
+      state.commuterData.announcements.loading ||
+      state.commuterData.advisories.loading,
+  );
   const currentLocation = useAppSelector(
     state => state.location.currentLocation,
   );
+  const accessAllowed = useAppSelector(state => state.location.accessAllowed);
+  const permissionStatus = useAppSelector(
+    state => state.location.permissionStatus,
+  );
+  const locationRestoring = useAppSelector(state => state.location.restoring);
   const locationLoading = useAppSelector(state => state.location.loading);
   const locationError = useAppSelector(state => state.location.error);
   const unreadCount = useAppSelector(state => state.notifications.unreadCount);
@@ -71,7 +96,23 @@ export const HomeScreen = () => {
     if (routes.length === 0) {
       dispatch(loadRoutes());
     }
-  }, [categories.length, dispatch, routes.length]);
+    if (fares.length === 0) {
+      dispatch(loadFares());
+    }
+    if (announcements.length === 0) {
+      dispatch(loadAnnouncements());
+    }
+    if (advisories.length === 0) {
+      dispatch(loadAdvisories());
+    }
+  }, [
+    advisories.length,
+    announcements.length,
+    categories.length,
+    dispatch,
+    fares.length,
+    routes.length,
+  ]);
 
   useEffect(() => {
     if (currentLocation) {
@@ -97,6 +138,13 @@ export const HomeScreen = () => {
     dispatch(setSelectedCategory(category));
     navigation.navigate('Main', { screen: 'Explore' });
   };
+
+  // Approval from the first-run prompt is enough to show nearby stops. Only a
+  // revoked or blocked device permission removes that access.
+  const hasNearbyAccess =
+    accessAllowed &&
+    permissionStatus !== 'blocked' &&
+    permissionStatus !== 'denied';
 
   const pointsToShow = currentLocation ? nearbyBoardingPoints : boardingPoints;
 
@@ -148,8 +196,6 @@ export const HomeScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <DemoBanner />
-
         <AppSearchInput
           editable={false}
           onPress={openDestinationSearch}
@@ -191,7 +237,11 @@ export const HomeScreen = () => {
               numberOfLines={2}
             >
               {currentLocation?.address ??
-                'Allow location access to see nearby boarding points.'}
+                (hasNearbyAccess
+                  ? locationRestoring
+                    ? 'Finding your location for nearby boarding points…'
+                    : 'Location is unavailable right now. Tap Locate to retry.'
+                  : 'Allow location access to see nearby boarding points.')}
             </Text>
           </View>
           <TouchableOpacity
@@ -268,12 +318,18 @@ export const HomeScreen = () => {
         <View style={styles.section}>
           <SectionHeader
             title={
-              currentLocation ? 'Nearby boarding points' : 'Boarding points'
+              currentLocation || hasNearbyAccess
+                ? 'Nearby boarding points'
+                : 'Boarding points'
             }
             subtitle={
               currentLocation
                 ? 'Within 3 km of your location'
-                : 'Sample stops from the demonstration dataset'
+                : hasNearbyAccess
+                  ? locationRestoring
+                    ? 'Finding stops near you…'
+                    : 'Location unavailable — tap Locate to retry'
+                  : 'Sample stops from the demonstration dataset'
             }
             actionLabel="See map"
             onAction={() => navigation.navigate('Main', { screen: 'Explore' })}
@@ -318,28 +374,84 @@ export const HomeScreen = () => {
 
         <View style={styles.section}>
           <SectionHeader
-            title="Popular routes"
-            subtitle="Sample trips from the demonstration dataset"
+            title="Fares"
+            subtitle="Published fare records from the database"
+            actionLabel="See all"
+            onAction={() => navigation.navigate('TransportInfo')}
           />
-          {popularRoutes.map(route => (
-            <PopularRouteCard
-              key={route.id}
-              route={route}
-              onPress={() =>
-                navigation.navigate('RouteDetails', { routeId: route.routeId })
-              }
+          {faresLoading && fares.length === 0 ? (
+            <ActivityIndicator color={theme.colors.primary} />
+          ) : fares.length > 0 ? (
+            fares
+              .slice(0, 3)
+              .map(fare => <FareCard key={fare.id} fare={fare} />)
+          ) : (
+            <EmptyState
+              icon="cash-remove"
+              title="No fares published"
+              message="Fare records added by the transport team will appear here."
+              actionLabel="Refresh"
+              onAction={() => dispatch(loadFares())}
             />
-          ))}
+          )}
         </View>
 
-        <View style={styles.section}>
-          <SectionHeader title="Service updates" subtitle="Sample advisories" />
-          {announcements.map(announcement => (
-            <AnnouncementCard
-              key={announcement.id}
-              announcement={announcement}
+        {popularRoutes.length > 0 ? (
+          <View style={styles.section}>
+            <SectionHeader
+              title="Popular routes"
+              subtitle="Frequently saved trips"
             />
-          ))}
+            {popularRoutes.map(route => (
+              <PopularRouteCard
+                key={route.id}
+                route={route}
+                onPress={() =>
+                  navigation.navigate('RouteDetails', {
+                    routeId: route.routeId,
+                  })
+                }
+              />
+            ))}
+          </View>
+        ) : null}
+
+        <View style={styles.section}>
+          <SectionHeader
+            title="Service updates"
+            subtitle="Announcements and active advisories"
+            actionLabel="See all"
+            onAction={() => navigation.navigate('TransportInfo')}
+          />
+          {updatesLoading &&
+          announcements.length === 0 &&
+          advisories.length === 0 ? (
+            <ActivityIndicator color={theme.colors.primary} />
+          ) : (
+            <>
+              {announcements.slice(0, 2).map(announcement => (
+                <ServiceAnnouncementCard
+                  key={announcement.id}
+                  announcement={announcement}
+                />
+              ))}
+              {advisories.slice(0, 2).map(advisory => (
+                <AdvisoryCard key={advisory.id} advisory={advisory} />
+              ))}
+              {announcements.length === 0 && advisories.length === 0 ? (
+                <EmptyState
+                  icon="bullhorn-outline"
+                  title="No service updates"
+                  message="Announcements and advisories will appear here once published."
+                  actionLabel="Refresh"
+                  onAction={() => {
+                    dispatch(loadAnnouncements());
+                    dispatch(loadAdvisories());
+                  }}
+                />
+              ) : null}
+            </>
+          )}
         </View>
 
         <View

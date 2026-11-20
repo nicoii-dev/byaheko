@@ -11,6 +11,8 @@ export const STORAGE_KEYS = {
   THEME: '@ByaheKo/theme',
   FAVORITES: '@ByaheKo/favorites',
   ONBOARDING_SEEN: '@ByaheKo/onboarding_seen',
+  LOCATION_PROMPT_SEEN: '@ByaheKo/location_prompt_seen',
+  LOCATION_ACCESS_ALLOWED: '@ByaheKo/location_access_allowed',
   RECENT_SEARCHES: '@ByaheKo/recent_searches',
   SETTINGS: '@ByaheKo/settings',
 } as const;

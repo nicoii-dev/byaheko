@@ -62,10 +62,7 @@ export const BoardingPointCard = ({
             {boardingPoint.name}
           </Text>
           {typeof distanceMeters === 'number' ? (
-            <Text
-              variant="labelSmall"
-              style={{ color: theme.colors.primary }}
-            >
+            <Text variant="labelSmall" style={{ color: theme.colors.primary }}>
               {formatDistance(distanceMeters)}
             </Text>
           ) : null}

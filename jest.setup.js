@@ -40,6 +40,51 @@ jest.mock('react-native-maps', () => {
   };
 });
 
+jest.mock('@maplibre/maplibre-react-native', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+
+  const MockMap = React.forwardRef((props, ref) => {
+    React.useImperativeHandle(ref, () => ({
+      getCenter: jest.fn(),
+      getZoom: jest.fn(),
+      getBounds: jest.fn(),
+      queryRenderedFeatures: jest.fn(),
+    }));
+    return React.createElement(View, props, props.children);
+  });
+
+  const MockCamera = React.forwardRef((props, ref) => {
+    React.useImperativeHandle(ref, () => ({
+      fitBounds: jest.fn(),
+      flyTo: jest.fn(),
+      easeTo: jest.fn(),
+      jumpTo: jest.fn(),
+    }));
+    return React.createElement(View, props);
+  });
+
+  const MockSource = React.forwardRef((props, ref) => {
+    React.useImperativeHandle(ref, () => ({
+      setFeatureState: jest.fn(),
+      getFeatureState: jest.fn(),
+    }));
+    return React.createElement(View, props, props.children);
+  });
+
+  const MockMarker = props => React.createElement(View, props, props.children);
+
+  return {
+    __esModule: true,
+    Map: MockMap,
+    Camera: MockCamera,
+    GeoJSONSource: MockSource,
+    Layer: props => React.createElement(View, props),
+    Marker: MockMarker,
+    UserLocation: props => React.createElement(View, props),
+  };
+});
+
 jest.mock('react-native-webview', () => {
   const React = require('react');
   const { View } = require('react-native');

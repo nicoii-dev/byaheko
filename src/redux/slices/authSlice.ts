@@ -166,18 +166,15 @@ export const updateProfile = createAsyncThunk<
   }
 });
 
-export const logout = createAsyncThunk<void, void>(
-  'auth/logout',
-  async () => {
-    try {
-      await authApi.logout();
-    } catch {
-      // Local sign-out must succeed even if the network request fails.
-    } finally {
-      await clearSession();
-    }
-  },
-);
+export const logout = createAsyncThunk<void, void>('auth/logout', async () => {
+  try {
+    await authApi.logout();
+  } catch {
+    // Local sign-out must succeed even if the network request fails.
+  } finally {
+    await clearSession();
+  }
+});
 
 const authSlice = createSlice({
   name: 'auth',

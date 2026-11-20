@@ -71,9 +71,7 @@ const renderProfileIcon = (props: TabIconProps) => (
 export const MainTabNavigator = () => {
   const theme = useAppTheme();
   const dispatch = useAppDispatch();
-  const unreadCount = useAppSelector(
-    state => state.notifications.unreadCount,
-  );
+  const unreadCount = useAppSelector(state => state.notifications.unreadCount);
   const notificationEnabled = useAppSelector(
     state => state.settings.notificationEnabled,
   );

@@ -10,9 +10,7 @@ interface AnnouncementCardProps {
   announcement: Announcement;
 }
 
-export const AnnouncementCard = ({
-  announcement,
-}: AnnouncementCardProps) => {
+export const AnnouncementCard = ({ announcement }: AnnouncementCardProps) => {
   const theme = useAppTheme();
   const isAdvisory = announcement.type === 'advisory';
   const color = isAdvisory ? theme.colors.warning : theme.colors.info;

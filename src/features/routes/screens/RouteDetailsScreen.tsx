@@ -19,7 +19,10 @@ import {
   planTrip,
   setSelectedRouteOption,
 } from '../../../redux/slices/routesSlice';
-import { addFavorite, removeFavorite } from '../../../redux/slices/favoritesSlice';
+import {
+  addFavorite,
+  removeFavorite,
+} from '../../../redux/slices/favoritesSlice';
 import { formatDistance, formatDuration, formatFare } from '../../../utils/geo';
 import type { RootStackParamList } from '../../../navigation/types';
 import type { Location, Route, RouteOption, TripStep } from '../../../types';
@@ -54,9 +57,7 @@ const stepIcon = (step: TripStep): string => {
   return 'walk';
 };
 
-const toStopLocation = (
-  stop: Route['stops'][number],
-): Location => ({
+const toStopLocation = (stop: Route['stops'][number]): Location => ({
   id: stop.id,
   name: stop.name,
   address: stop.name,
@@ -64,7 +65,10 @@ const toStopLocation = (
   longitude: stop.longitude,
 });
 
-export const RouteDetailsScreen = ({ navigation, route: screenRoute }: Props) => {
+export const RouteDetailsScreen = ({
+  navigation,
+  route: screenRoute,
+}: Props) => {
   const theme = useAppTheme();
   const dispatch = useAppDispatch();
 
@@ -101,10 +105,7 @@ export const RouteDetailsScreen = ({ navigation, route: screenRoute }: Props) =>
 
   const favorite = selectedRoute
     ? favorites.find(
-        item =>
-          item.type === 'route' &&
-          'id' in item.data &&
-          item.data.id === selectedRoute.id,
+        item => item.type === 'route' && item.targetId === selectedRoute.id,
       )
     : undefined;
 
@@ -119,8 +120,8 @@ export const RouteDetailsScreen = ({ navigation, route: screenRoute }: Props) =>
     dispatch(
       addFavorite({
         type: 'route',
-        name: selectedRoute.routeName,
-        data: selectedRoute,
+        targetId: selectedRoute.id,
+        label: selectedRoute.routeName,
       }),
     );
   };
@@ -150,7 +151,10 @@ export const RouteDetailsScreen = ({ navigation, route: screenRoute }: Props) =>
   if (!option && !selectedRoute) {
     return (
       <Screen>
-        <ScreenHeader title="Route details" onBack={() => navigation.goBack()} />
+        <ScreenHeader
+          title="Route details"
+          onBack={() => navigation.goBack()}
+        />
         <EmptyState
           icon="routes"
           title="No route selected"
@@ -168,7 +172,9 @@ export const RouteDetailsScreen = ({ navigation, route: screenRoute }: Props) =>
         title={option ? 'Route option' : selectedRoute?.routeCode ?? 'Route'}
         subtitle={option?.summary ?? selectedRoute?.routeName}
         onBack={() => navigation.goBack()}
-        rightIcon={selectedRoute ? (favorite ? 'heart' : 'heart-outline') : undefined}
+        rightIcon={
+          selectedRoute ? (favorite ? 'heart' : 'heart-outline') : undefined
+        }
         onRightPress={selectedRoute ? toggleFavorite : undefined}
         rightAccessibilityLabel={
           favorite ? 'Remove from favorites' : 'Save route to favorites'
@@ -275,7 +281,10 @@ export const RouteDetailsScreen = ({ navigation, route: screenRoute }: Props) =>
 
             <Text
               variant="titleMedium"
-              style={[styles.sectionTitle, { color: theme.colors.onBackground }]}
+              style={[
+                styles.sectionTitle,
+                { color: theme.colors.onBackground },
+              ]}
             >
               Step by step
             </Text>
@@ -439,7 +448,10 @@ export const RouteDetailsScreen = ({ navigation, route: screenRoute }: Props) =>
 
             <Text
               variant="titleMedium"
-              style={[styles.sectionTitle, { color: theme.colors.onBackground }]}
+              style={[
+                styles.sectionTitle,
+                { color: theme.colors.onBackground },
+              ]}
             >
               Stops
             </Text>
@@ -460,7 +472,8 @@ export const RouteDetailsScreen = ({ navigation, route: screenRoute }: Props) =>
                         styles.stopDot,
                         {
                           backgroundColor:
-                            index === 0 || index === selectedRoute.stops.length - 1
+                            index === 0 ||
+                            index === selectedRoute.stops.length - 1
                               ? theme.colors.primary
                               : theme.colors.surface,
                           borderColor: theme.colors.primary,

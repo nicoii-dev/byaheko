@@ -27,8 +27,7 @@ export function mapApiUser(user: ApiUser): User {
     email: user.email,
     mobileNumber: user.mobileNumber ?? '',
     avatar: user.avatar ?? undefined,
-    isEmailVerified:
-      user.emailVerifiedAt !== null || user.status === 'ACTIVE',
+    isEmailVerified: user.emailVerifiedAt !== null || user.status === 'ACTIVE',
     status: user.status,
     role: user.role,
     emailVerifiedAt: user.emailVerifiedAt,

@@ -15,8 +15,9 @@ trips with walking directions, and save the places and routes they use often.
   verification flows.
 - Home dashboard with nearby stops, transport categories, popular routes, and
   service updates.
-- Explore tab with an OpenStreetMap-based map, boarding-point filters, and
-  distance sorting.
+- Explore tab with a MapLibre/OpenStreetMap map showing backend routes as
+  coloured polylines, route selection, destination search, boarding-point
+  filters, and distance sorting.
 - Transportation directory with per-vehicle route counts, boarding-point
   counts, fare ranges, and drill-down category pages.
 - Trip planner that builds direct rides, one-transfer trips, and walking-only
@@ -37,7 +38,7 @@ trips with walking directions, and save the places and routes they use often.
 | Forms | React Hook Form, Yup, `@hookform/resolvers` |
 | UI | React Native Paper, MaterialCommunityIcons |
 | Navigation | React Navigation native stack + bottom tabs |
-| Maps | OpenStreetMap via Leaflet + `react-native-webview` (default); React Native Maps retained for Google/Apple Maps |
+| Maps | MapLibre Native with OSM-derived CARTO basemaps (default); legacy Leaflet WebView and React Native Maps retained |
 | Location | `@react-native-community/geolocation` |
 | HTTP | Axios with a centralized client and interceptors |
 | Storage | `@react-native-async-storage/async-storage` |
@@ -53,7 +54,7 @@ src/
     cards/                 Boarding point, route, category, directory cards
     common/                Screen, headers, state views, banners, stat tiles
     inputs/                Text, password, phone, select, search inputs
-    maps/                  OpenStreetMap (default), TransportMap (Google/Apple)
+    maps/                  MapLibreMap (default), OpenStreetMap (legacy), TransportMap (Google/Apple)
   config/                  Theme, constants, environment
   hooks/                   Generic hooks such as debounced values
   features/
@@ -151,6 +152,20 @@ Runtime configuration is read in `src/config/environment.ts`:
 | `BYAHEKO_API_URL` | `http://localhost:5050/api/v1` (iOS simulator)<br>`http://10.0.2.2:5050/api/v1` (Android emulator) | byaheko-api base URL |
 | `BYAHEKO_APP_VERSION` | `1.0.0` | Displayed app version |
 | `BYAHEKO_USE_MOCKS` | `false` | Set to `true` to use in-memory mock services |
+| `BYAHEKO_MAP_STYLE_URL` | CARTO Positron (OSM) | MapLibre style URL for the light theme |
+| `BYAHEKO_MAP_STYLE_DARK_URL` | CARTO Dark Matter (OSM) | MapLibre style URL for the dark theme |
+| `BYAHEKO_GEOCODER_URL` | `https://photon.komoot.io/api` | Photon-compatible destination search endpoint |
+| `BYAHEKO_DISABLE_API_LOGS` | `false` | Set to `true` to silence API request/response logs |
+
+### API request logging
+
+Every API call is logged to the console with a `[ByaheKo API]` prefix. Calls
+through the shared Axios client are logged by its interceptors, including the
+token-refresh request; the Photon geocoder logs its own calls. Requests show the
+resolved URL, query params, and body; responses show the status code and
+elapsed time; failures show the status, error code, message, and response body.
+Passwords, tokens, and authorization headers are redacted, so the output is safe
+to share. Set `BYAHEKO_DISABLE_API_LOGS=true` to turn logging off.
 
 The app talks to the NestJS backend in `../byaheko-api` by default. Start it with
 `npm run start:dev` (it listens on port `5050`). The default base URL already
@@ -179,26 +194,60 @@ not create a session.
 `ACCESS_COARSE_LOCATION`. The app requests permission at runtime before reading
 the device location and handles denied and permanently blocked states.
 
+### First-run location confirmation
+
+On a fresh install, completing (or skipping) onboarding opens a confirmation
+screen that explains why ByaheKo would like to use location, before the
+operating system's own permission dialog. Tapping **Allow location** requests
+the device permission and reads the current fix; **Not now** skips it without
+calling any location API. The choice is saved under
+`STORAGE_KEYS.LOCATION_PROMPT_SEEN` (`@ByaheKo/location_prompt_seen`), so
+returning users are never prompted again.
+
+Approval is stored separately under `STORAGE_KEYS.LOCATION_ACCESS_ALLOWED`
+(`@ByaheKo/location_access_allowed`). On every later launch the Splash screen
+dispatches `restoreLocationAccess()`, which quietly re-reads the device location
+without showing the OS dialog again. Home and Explore therefore use
+`nearbyBoardingPoints` automatically — users who already allowed location never
+have to press "Locate" or "Use my location" again. A revoked or blocked device
+permission downgrades access and restores the manual "Use my location" prompt.
+Users who chose "Not now" can still enable location later from those controls.
+
 ### OpenStreetMap maps (default)
 
-The map surfaces use `src/components/maps/OpenStreetMap.tsx`, which renders
-Leaflet inside `react-native-webview` with free OpenStreetMap tiles. These
-screens do not require a Google Maps API key. The component needs network access
-to load Leaflet from unpkg and tiles from `tile.openstreetmap.org`.
+Explore uses `src/components/maps/MapLibreMap.tsx`, powered by
+`@maplibre/maplibre-react-native`. Routes come from the existing backend
+`GET /api/v1/routes` endpoint; `src/utils/routeGeoJson.ts` converts each route's
+`latitude`/`longitude` stop records into GeoJSON with `[longitude, latitude]`
+coordinates. Each route is drawn as its own coloured line with origin,
+destination, and intermediate stop markers. Tapping a line or marker selects the
+route, frames it with `fitBounds`, and opens its details below the map. Boarding
+points and the searched destination are also rendered on the same map.
 
-After installing dependencies, rebuild the native apps so
-`react-native-webview` is linked. On iOS, run `cd ios && bundle exec pod install`
-before building. On Android, autolinking handles the native module during the
-next Gradle build.
+The basemap defaults to CARTO's OSM-derived Positron/Dark Matter styles. These
+are production CDN tiles and include OpenStreetMap attribution; no Google Maps
+key is required. Override `BYAHEKO_MAP_STYLE_URL` /
+`BYAHEKO_MAP_STYLE_DARK_URL` to use your own provider. Destination search uses
+Photon (an OSM geocoder) by default; set `BYAHEKO_GEOCODER_URL` to a hosted,
+production-grade provider with the same GeoJSON response shape before release.
+The public community services are suitable for development and light use only.
 
-The map displays the required “© OpenStreetMap contributors” attribution. The
-community tile server is intended for development and light use only. Review the
-[OSM tile usage policy](https://operations.osmfoundation.org/policies/tiles/)
-and change `OPENSTREETMAP.tileUrl` in `src/config/constants.ts` to a production
-tile provider before shipping.
+Because MapLibre Native is a native module, rebuild the apps after installing
+dependencies:
 
-The original `TransportMap` remains available. Switch a screen's map import back
-to `TransportMap` if you need the Google/Apple Maps implementation instead.
+```sh
+npm install
+cd ios && bundle exec pod install && cd ..
+npm run android   # or: npm run ios
+```
+
+Android autolinking handles the module during the next Gradle build. If you
+switch the API or geocoder URLs, restart Metro with a cleared cache.
+
+`src/components/maps/OpenStreetMap.tsx` (Leaflet in a WebView) is kept as a
+legacy reference and is covered by its own test; it is no longer used by the
+app screens. The original `TransportMap` (Google/Apple Maps) is likewise
+retained for reference and is not used by default.
 
 ### Android Google Maps key (legacy TransportMap only)
 
@@ -265,7 +314,11 @@ The test suite covers:
 - Auth, favorites, and theme reducers.
 - Mock auth, transportation, and routes services.
 - OpenStreetMap WebView markup, required OSM attribution, marker press
-  handling, and recenter visibility.
+  handling, and recenter visibility (legacy component).
+- Route-to-GeoJSON conversion (`[longitude, latitude]` order, invalid/duplicate
+  coordinate filtering, selected/dimmed styling, boarding and destination
+  markers) and backend route response mapping.
+- API logging output, including redaction of sensitive fields.
 - A root-app smoke render.
 
 ```sh
@@ -276,8 +329,8 @@ npm run lint
 
 Jest mocks native modules that are not available in the Node environment:
 gesture handler, Reanimated, AsyncStorage, safe-area context, vector icons,
-React Native Maps, React Native WebView, and geolocation. See `jest.setup.js`
-and `jest.config.js`.
+React Native Maps, MapLibre React Native, React Native WebView, and geolocation.
+See `jest.setup.js` and `jest.config.js`.
 
 ## Data and product guardrails
 
@@ -288,20 +341,24 @@ and `jest.config.js`.
   returns an empty result.
 - No live vehicle positions, ETAs, or real-time arrival data are implemented.
 - Location permission denial and permanent blocking are handled explicitly in
-  the Explore flow and Settings.
+  the first-run confirmation screen, the Explore flow, and Settings.
 - Before release, replace the mock services with verified operator data and
   review every fare and route against the relevant LTFRB records.
 
 ## Known limitations
 
-- The backend is not part of this repository; production Axios clients are
-  present but unused while mocks are enabled.
+- The backend lives in `../byaheko-api`. It now exposes `GET /api/v1/routes`
+  (with ordered stops and transportation types) used by the Explore map; no new
+  tables or seed data were introduced. The geocoding endpoint is optional—the
+  client falls back to Photon when `/geocode/search` is unavailable.
 - The bundled Nunito file is a variable font. iOS uses its PostScript name
   (`Nunito-Regular`) and Android uses the family name (`Nunito`); verify both on
   a physical device when changing the font.
-- The OpenStreetMap view is a Leaflet map inside a WebView. It requires network
-  access for Leaflet, tiles, and map interactions; offline maps are not
-  implemented. The community OSM tile server is not intended for production
-  traffic, so configure a suitable provider before release.
+- The MapLibre map requires network access for the CARTO basemap style and
+  tiles and for Photon geocoding; offline maps are not implemented. The default
+  public providers are suitable for development and light use only—configure
+  production URLs before release. The legacy Leaflet WebView component
+  (`OpenStreetMap.tsx`) still depends on unpkg and the community OSM tile
+  server, but is no longer rendered by any screen.
 - Android release builds still use the debug signing configuration from the
   React Native template and must be replaced before distribution.

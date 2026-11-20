@@ -6,7 +6,6 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../../../config/theme';
 import Screen from '../../../components/common/Screen';
 import ScreenHeader from '../../../components/common/ScreenHeader';
-import DemoBanner from '../../../components/common/DemoBanner';
 import AppButton from '../../../components/buttons/AppButton';
 import TransportBadge from '../../../components/common/TransportBadge';
 import OpenStreetMap from '../../../components/maps/OpenStreetMap';
@@ -14,7 +13,10 @@ import RouteListCard from '../../../components/cards/RouteListCard';
 import { EmptyState } from '../../../components/common/StateViews';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setSelectedOrigin } from '../../../redux/slices/locationSlice';
-import { addFavorite, removeFavorite } from '../../../redux/slices/favoritesSlice';
+import {
+  addFavorite,
+  removeFavorite,
+} from '../../../redux/slices/favoritesSlice';
 import { haversineDistance } from '../../../utils/geo';
 import type { RootStackParamList } from '../../../navigation/types';
 
@@ -31,9 +33,8 @@ export const BoardingPointDetailsScreen = ({ navigation, route }: Props) => {
 
   const point = useMemo(
     () =>
-      boardingPoints.find(
-        item => item.id === route.params.boardingPointId,
-      ) ?? null,
+      boardingPoints.find(item => item.id === route.params.boardingPointId) ??
+      null,
     [boardingPoints, route.params.boardingPointId],
   );
 
@@ -49,10 +50,7 @@ export const BoardingPointDetailsScreen = ({ navigation, route }: Props) => {
 
   const favorite = point
     ? favorites.find(
-        item =>
-          item.type === 'boarding_point' &&
-          'id' in item.data &&
-          item.data.id === point.id,
+        item => item.type === 'boarding_point' && item.targetId === point.id,
       )
     : undefined;
 
@@ -66,7 +64,7 @@ export const BoardingPointDetailsScreen = ({ navigation, route }: Props) => {
         <EmptyState
           icon="map-marker-question-outline"
           title="Boarding point not found"
-          message="This stop may have been removed from the demonstration dataset."
+          message="This stop may have been removed or is no longer available."
           actionLabel="Open Explore"
           onAction={() => navigation.navigate('Main', { screen: 'Explore' })}
         />
@@ -82,8 +80,8 @@ export const BoardingPointDetailsScreen = ({ navigation, route }: Props) => {
     dispatch(
       addFavorite({
         type: 'boarding_point',
-        name: point.name,
-        data: point,
+        targetId: point.id,
+        label: point.name,
       }),
     );
   };
@@ -117,8 +115,6 @@ export const BoardingPointDetailsScreen = ({ navigation, route }: Props) => {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <DemoBanner />
-
         <OpenStreetMap
           center={point}
           boardingPoints={[point]}
@@ -174,7 +170,10 @@ export const BoardingPointDetailsScreen = ({ navigation, route }: Props) => {
           {point.description ? (
             <Text
               variant="bodyMedium"
-              style={[styles.description, { color: theme.colors.onSurfaceVariant }]}
+              style={[
+                styles.description,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
             >
               {point.description}
             </Text>

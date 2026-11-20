@@ -6,6 +6,7 @@ import favoritesReducer from './slices/favoritesSlice';
 import notificationsReducer from './slices/notificationsSlice';
 import transportationReducer from './slices/transportationSlice';
 import routesReducer from './slices/routesSlice';
+import commuterDataReducer from './slices/commuterDataSlice';
 import settingsReducer from './slices/settingsSlice';
 
 export const store = configureStore({
@@ -17,6 +18,7 @@ export const store = configureStore({
     notifications: notificationsReducer,
     transportation: transportationReducer,
     routes: routesReducer,
+    commuterData: commuterDataReducer,
     settings: settingsReducer,
   },
 });

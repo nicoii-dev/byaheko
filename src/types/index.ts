@@ -166,9 +166,11 @@ export interface User {
 export interface Favorite {
   id: string;
   type: FavoriteType;
-  name: string;
-  data: Location | Route | BoardingPoint;
+  /** ID of the saved route, boarding point, or destination. */
+  targetId: string;
+  label?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface AppNotification {
@@ -269,6 +271,10 @@ export interface LocationState {
   selectedOrigin: Location | null;
   selectedDestination: Location | null;
   permissionStatus: 'granted' | 'denied' | 'blocked' | 'undetermined';
+  /** Persisted first-run approval; distinct from having merely seen the prompt. */
+  accessAllowed: boolean;
+  /** True while the silent startup location restore is in flight. */
+  restoring: boolean;
   recentSearches: Location[];
   loading: boolean;
   error: string | null;

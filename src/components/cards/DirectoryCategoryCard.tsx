@@ -3,10 +3,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../config/theme';
-import {
-  formatFareRange,
-  getCategoryColor,
-} from '../../utils/transport';
+import { formatFareRange, getCategoryColor } from '../../utils/transport';
 import type { CategorySummary } from '../../utils/transport';
 import type { Transportation } from '../../types';
 
@@ -40,11 +37,7 @@ export const DirectoryCategoryCard = ({
       ]}
     >
       <View style={[styles.iconWrap, { backgroundColor: `${color}1A` }]}>
-        <MaterialCommunityIcons
-          name={category.icon}
-          size={24}
-          color={color}
-        />
+        <MaterialCommunityIcons name={category.icon} size={24} color={color} />
       </View>
       <View style={styles.body}>
         <Text

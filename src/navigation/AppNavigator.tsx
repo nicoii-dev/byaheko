@@ -10,6 +10,7 @@ import { useAppTheme } from '../config/theme';
 import { useAppSelector } from '../redux/hooks';
 import SplashScreen from '../features/onboarding/screens/SplashScreen';
 import OnboardingScreen from '../features/onboarding/screens/OnboardingScreen';
+import LocationPermissionScreen from '../features/onboarding/screens/LocationPermissionScreen';
 import LoginScreen from '../features/auth/screens/LoginScreen';
 import RegisterScreen from '../features/auth/screens/RegisterScreen';
 import ForgotPasswordScreen from '../features/auth/screens/ForgotPasswordScreen';
@@ -21,6 +22,7 @@ import NavigationScreen from '../features/routes/screens/NavigationScreen';
 import BoardingPointDetailsScreen from '../features/routes/screens/BoardingPointDetailsScreen';
 import TransportationDirectoryScreen from '../features/directory/screens/TransportationDirectoryScreen';
 import TransportationCategoryDetailsScreen from '../features/directory/screens/TransportationCategoryDetailsScreen';
+import TransportInfoScreen from '../features/commuter/screens/TransportInfoScreen';
 import NotificationsScreen from '../features/notifications/screens/NotificationsScreen';
 import EditProfileScreen from '../features/profile/screens/EditProfileScreen';
 import SettingsScreen from '../features/profile/screens/SettingsScreen';
@@ -70,12 +72,14 @@ export const AppNavigator = () => {
           options={{ animation: 'fade' }}
         />
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        <Stack.Screen
+          name="LocationPermission"
+          component={LocationPermissionScreen}
+          options={{ animation: 'fade' }}
+        />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen
-          name="ForgotPassword"
-          component={ForgotPasswordScreen}
-        />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
         <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
         <Stack.Screen name="Main" component={MainTabNavigator} />
@@ -98,10 +102,8 @@ export const AppNavigator = () => {
           name="TransportationCategoryDetails"
           component={TransportationCategoryDetailsScreen}
         />
-        <Stack.Screen
-          name="Notifications"
-          component={NotificationsScreen}
-        />
+        <Stack.Screen name="TransportInfo" component={TransportInfoScreen} />
+        <Stack.Screen name="Notifications" component={NotificationsScreen} />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Legal" component={LegalScreen} />

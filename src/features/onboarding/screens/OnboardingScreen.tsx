@@ -69,7 +69,24 @@ export const OnboardingScreen = ({ navigation }: Props) => {
 
   const finish = async () => {
     await storage.setItem(STORAGE_KEYS.ONBOARDING_SEEN, 'true');
-    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+    const locationPromptSeen = await storage.getItem(
+      STORAGE_KEYS.LOCATION_PROMPT_SEEN,
+    );
+
+    // Onboarding only runs on a fresh install, so this is the one time we ask
+    // whether the app may use location. The flag keeps the answer remembered.
+    navigation.reset({
+      index: 0,
+      routes:
+        locationPromptSeen === 'true'
+          ? [{ name: 'Login' }]
+          : [
+              {
+                name: 'LocationPermission',
+                params: { returnTo: 'Login' },
+              },
+            ],
+    });
   };
 
   const next = () => {

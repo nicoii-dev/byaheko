@@ -1,10 +1,10 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import type { Favorite, FavoritesState } from '../../types';
-import { STORAGE_KEYS } from '../../config/constants';
-import { favoritesApi } from '../../services/api/favoritesApi';
-import { storage } from '../../services/storage';
+import {
+  favoritesApi,
+  type FavoriteInput,
+} from '../../services/api/favoritesApi';
 import { getErrorMessage } from '../../utils/errors';
-import type { RootState } from '../store';
 
 const initialState: FavoritesState = {
   items: [],
@@ -18,15 +18,7 @@ export const loadFavorites = createAsyncThunk<
   { rejectValue: string }
 >('favorites/load', async (_, { rejectWithValue }) => {
   try {
-    const stored = await storage.getJson<Favorite[]>(STORAGE_KEYS.FAVORITES);
-    if (stored) {
-      return stored;
-    }
-    const remote = await favoritesApi.getFavorites();
-    if (remote.length > 0) {
-      await storage.setJson(STORAGE_KEYS.FAVORITES, remote);
-    }
-    return remote;
+    return await favoritesApi.getFavorites();
   } catch (error) {
     return rejectWithValue(
       getErrorMessage(error, 'Unable to load your favorites.'),
@@ -35,20 +27,12 @@ export const loadFavorites = createAsyncThunk<
 });
 
 export const addFavorite = createAsyncThunk<
-  Favorite[],
-  Omit<Favorite, 'id' | 'createdAt'>,
-  { state: RootState; rejectValue: string }
->('favorites/add', async (favorite, { getState, rejectWithValue }) => {
+  Favorite,
+  FavoriteInput,
+  { rejectValue: string }
+>('favorites/add', async (favorite, { rejectWithValue }) => {
   try {
-    const newFavorite: Favorite = {
-      ...favorite,
-      id: `fav_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    await favoritesApi.addFavorite(newFavorite);
-    const next = [...getState().favorites.items, newFavorite];
-    await storage.setJson(STORAGE_KEYS.FAVORITES, next);
-    return next;
+    return await favoritesApi.addFavorite(favorite);
   } catch (error) {
     return rejectWithValue(
       getErrorMessage(error, 'Unable to save this favorite.'),
@@ -57,15 +41,13 @@ export const addFavorite = createAsyncThunk<
 });
 
 export const removeFavorite = createAsyncThunk<
-  Favorite[],
   string,
-  { state: RootState; rejectValue: string }
->('favorites/remove', async (id, { getState, rejectWithValue }) => {
+  string,
+  { rejectValue: string }
+>('favorites/remove', async (id, { rejectWithValue }) => {
   try {
     await favoritesApi.removeFavorite(id);
-    const next = getState().favorites.items.filter(item => item.id !== id);
-    await storage.setJson(STORAGE_KEYS.FAVORITES, next);
-    return next;
+    return id;
   } catch (error) {
     return rejectWithValue(
       getErrorMessage(error, 'Unable to remove this favorite.'),
@@ -97,7 +79,9 @@ const favoritesSlice = createSlice({
       })
       .addCase(addFavorite.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload;
+        if (!state.items.some(item => item.id === action.payload.id)) {
+          state.items.unshift(action.payload);
+        }
       })
       .addCase(addFavorite.rejected, (state, action) => {
         state.loading = false;
@@ -109,7 +93,7 @@ const favoritesSlice = createSlice({
       })
       .addCase(removeFavorite.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload;
+        state.items = state.items.filter(item => item.id !== action.payload);
       })
       .addCase(removeFavorite.rejected, (state, action) => {
         state.loading = false;

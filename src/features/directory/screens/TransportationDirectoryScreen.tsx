@@ -31,14 +31,14 @@ export const TransportationDirectoryScreen = ({ navigation }: Props) => {
     <Screen edges={['top']}>
       <ScreenHeader
         title="Transportation directory"
-        subtitle="Vehicle types in this demonstration build"
+        subtitle="Vehicle types and stops from ByaheKo"
         onBack={() => navigation.goBack()}
       />
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <DemoBanner message="Demonstration directory. Vehicle types, routes, and fares are sample data and are not verified operator records." />
+        <DemoBanner message="Vehicle categories are provided by the app. Boarding points are live from ByaheKo; route and fare coverage is still expanding." />
 
         {error && categories.length > 0 ? (
           <InfoBanner
@@ -52,7 +52,10 @@ export const TransportationDirectoryScreen = ({ navigation }: Props) => {
         {showInitialLoading ? (
           <LoadingState message="Loading transportation types…" />
         ) : showInitialError ? (
-          <ErrorState message={error ?? 'Unable to load the directory.'} onRetry={reload} />
+          <ErrorState
+            message={error ?? 'Unable to load the directory.'}
+            onRetry={reload}
+          />
         ) : categories.length === 0 ? (
           <EmptyState
             icon="bus-multiple"

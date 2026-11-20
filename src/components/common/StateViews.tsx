@@ -3,15 +3,14 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../config/theme';
+import { MESSAGES } from '../../config/messages';
 import AppButton from '../buttons/AppButton';
 
 interface LoadingStateProps {
   message?: string;
 }
 
-export const LoadingState = ({
-  message = 'Loading…',
-}: LoadingStateProps) => {
+export const LoadingState = ({ message = 'Loading…' }: LoadingStateProps) => {
   const theme = useAppTheme();
   return (
     <View style={styles.container}>
@@ -82,11 +81,14 @@ export const EmptyState = ({
 };
 
 interface ErrorStateProps {
-  message: string;
+  message?: string;
   onRetry?: () => void;
 }
 
-export const ErrorState = ({ message, onRetry }: ErrorStateProps) => {
+export const ErrorState = ({
+  message = MESSAGES.loadFailed,
+  onRetry,
+}: ErrorStateProps) => {
   const theme = useAppTheme();
   return (
     <View style={styles.container}>

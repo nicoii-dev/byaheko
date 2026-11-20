@@ -4,11 +4,25 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 import { environment } from '../../config/environment';
+import { MESSAGES } from '../../config/messages';
+import { getStatusMessage } from '../../utils/errors';
 import sessionStorage from './session';
-import type { ApiAuthResult, ApiEnvelope, ApiErrorBody } from './types';
+import {
+  logApiError,
+  logApiRequest,
+  logApiResponse,
+} from './log';
+import type {
+  ApiAuthResult,
+  ApiEnvelope,
+  ApiErrorBody,
+  PaginationMeta,
+} from './types';
 
 interface RetriableRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
+  /** Used to report request duration in the response/error logs. */
+  _startTime?: number;
 }
 
 const api: AxiosInstance = axios.create({
@@ -67,11 +81,19 @@ async function rotateTokens(): Promise<string | null> {
     return null;
   }
 
+  const startedAt = Date.now();
+  const refreshUrl = `${environment.apiBaseUrl}/auth/refresh`;
+  logApiRequest({
+    method: 'post',
+    url: refreshUrl,
+    data: { refreshToken },
+  });
+
   try {
     // Use a bare axios call so this request cannot recurse through the
     // interceptors while we are already handling a 401.
     const response = await axios.post<ApiEnvelope<ApiAuthResult>>(
-      `${environment.apiBaseUrl}/auth/refresh`,
+      refreshUrl,
       { refreshToken },
       {
         timeout: environment.requestTimeoutMs,
@@ -82,6 +104,14 @@ async function rotateTokens(): Promise<string | null> {
       },
     );
 
+    logApiResponse({
+      method: 'post',
+      url: refreshUrl,
+      status: response.status,
+      durationMs: Date.now() - startedAt,
+      data: response.data,
+    });
+
     const tokens = response.data?.data?.tokens;
     if (!tokens?.accessToken || !tokens.refreshToken) {
       await sessionStorage.clearTokens();
@@ -90,7 +120,17 @@ async function rotateTokens(): Promise<string | null> {
 
     await sessionStorage.saveTokens(tokens);
     return tokens.accessToken;
-  } catch {
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiErrorBody>;
+    logApiError({
+      method: 'post',
+      url: refreshUrl,
+      status: axiosError.response?.status,
+      code: axiosError.code,
+      message: axiosError.message,
+      durationMs: Date.now() - startedAt,
+      data: axiosError.response?.data,
+    });
     await sessionStorage.clearTokens();
     return null;
   }
@@ -98,11 +138,16 @@ async function rotateTokens(): Promise<string | null> {
 
 function extractErrorMessage(error: AxiosError<ApiErrorBody>): string {
   if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
-    return 'The request timed out. Please try again.';
+    return MESSAGES.timeout;
   }
 
   if (error.response) {
-    const body = error.response.data;
+    const { status, data: body } = error.response;
+
+    // Server errors rarely carry copy that is safe to show to a user.
+    if (status >= 500) {
+      return MESSAGES.serverError;
+    }
 
     if (body) {
       const fieldErrors = body.errors
@@ -126,33 +171,64 @@ function extractErrorMessage(error: AxiosError<ApiErrorBody>): string {
       }
     }
 
-    return `Request failed (${error.response.status}).`;
+    return getStatusMessage(status) ?? MESSAGES.genericError;
   }
 
   if (error.request) {
-    return 'Network error. Check your internet connection and try again.';
+    return MESSAGES.offline;
   }
 
-  return 'Something went wrong. Please try again.';
+  return MESSAGES.genericError;
 }
 
 api.interceptors.request.use(
-  async config => {
+  async requestConfig => {
+    const config = requestConfig as RetriableRequestConfig;
+    config._startTime = Date.now();
+    logApiRequest(config);
     const token = await sessionStorage.getAccessToken();
     if (token) {
       config.headers.set('Authorization', `Bearer ${token}`);
     }
     return config;
   },
-  error => Promise.reject(error),
+  error => {
+    logApiError({
+      method: error.config?.method,
+      baseURL: error.config?.baseURL,
+      url: error.config?.url,
+      message: error.message,
+      durationMs: 0,
+    });
+    return Promise.reject(error);
+  },
 );
 
 api.interceptors.response.use(
   response => {
+    const config = response.config as RetriableRequestConfig;
+    // Log the raw envelope before services unwrap it.
+    logApiResponse({
+      method: config.method,
+      baseURL: config.baseURL,
+      url: config.url,
+      params: config.params,
+      status: response.status,
+      durationMs:
+        config._startTime !== undefined
+          ? Date.now() - config._startTime
+          : 0,
+      data: response.data,
+    });
+
     // Every byaheko-api success response is wrapped in
-    // { success, message, data, meta }. Services consume the payload directly.
+    // { success, message, data, meta }. Services consume the payload directly,
+    // while paginated helpers read the preserved pagination metadata.
     if (isEnvelope(response.data)) {
+      const meta = response.data.meta ?? null;
       response.data = response.data.data;
+      (response as typeof response & { meta?: PaginationMeta | null }).meta =
+        meta;
     }
     return response;
   },
@@ -161,20 +237,31 @@ api.interceptors.response.use(
     const status = error.response?.status;
     const publicRequest = isPublicAuthRequest(config?.url);
 
+    logApiError({
+      method: config?.method,
+      baseURL: config?.baseURL,
+      url: config?.url,
+      params: config?.params,
+      status,
+      code: error.code,
+      message: error.message,
+      durationMs:
+        config?._startTime !== undefined
+          ? Date.now() - config._startTime
+          : 0,
+      data: error.response?.data ?? error.request ?? undefined,
+    });
+
     if (status === 401 && config && !publicRequest) {
       if (config._retry) {
         await sessionStorage.clearTokens();
-        return Promise.reject(
-          new Error('Your session has expired. Please sign in again.'),
-        );
+        return Promise.reject(new Error(MESSAGES.sessionExpired));
       }
 
       const refreshedToken = await refreshAccessToken();
 
       if (!refreshedToken) {
-        return Promise.reject(
-          new Error('Your session has expired. Please sign in again.'),
-        );
+        return Promise.reject(new Error(MESSAGES.sessionExpired));
       }
 
       config._retry = true;

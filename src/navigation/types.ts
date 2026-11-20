@@ -14,6 +14,7 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
+  LocationPermission: { returnTo?: 'Login' | 'Main' } | undefined;
   Login: { verified?: boolean; email?: string } | undefined;
   Register: undefined;
   ForgotPassword: undefined;
@@ -30,6 +31,7 @@ export type RootStackParamList = {
   BoardingPointDetails: { boardingPointId: string };
   TransportationDirectory: undefined;
   TransportationCategoryDetails: { category: TransportationCategory };
+  TransportInfo: undefined;
   Notifications: undefined;
   EditProfile: undefined;
   Settings: undefined;

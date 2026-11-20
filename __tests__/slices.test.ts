@@ -48,7 +48,10 @@ describe('auth reducer', () => {
     expect(state.refreshToken).toBe('refresh_1');
     expect(state.pendingVerificationEmail).toBeNull();
 
-    state = authReducer(state, logout.fulfilled(undefined, 'request_2', undefined));
+    state = authReducer(
+      state,
+      logout.fulfilled(undefined, 'request_2', undefined),
+    );
 
     expect(state.isAuthenticated).toBe(false);
     expect(state.user).toBeNull();
@@ -93,19 +96,8 @@ describe('favorites reducer', () => {
   const favorite: Favorite = {
     id: 'fav_1',
     type: 'route',
-    name: 'Route A',
-    data: {
-      id: 'route_a',
-      routeCode: 'A',
-      routeName: 'Route A',
-      origin: 'Origin',
-      destination: 'Destination',
-      transportationType: 'jeepney',
-      stops: [],
-      fare: 15,
-      estimatedDuration: 20,
-      status: 'active',
-    },
+    targetId: 'route_a',
+    label: 'Route A',
     createdAt: '2025-01-15T08:00:00.000Z',
   };
 
@@ -114,10 +106,10 @@ describe('favorites reducer', () => {
 
     state = favoritesReducer(
       state,
-      addFavorite.fulfilled([favorite], 'request_1', {
+      addFavorite.fulfilled(favorite, 'request_1', {
         type: favorite.type,
-        name: favorite.name,
-        data: favorite.data,
+        targetId: favorite.targetId,
+        label: favorite.label,
       }),
     );
 
@@ -126,7 +118,7 @@ describe('favorites reducer', () => {
 
     state = favoritesReducer(
       state,
-      removeFavorite.fulfilled([], 'request_2', favorite.id),
+      removeFavorite.fulfilled(favorite.id, 'request_2', favorite.id),
     );
 
     expect(state.items).toEqual([]);

@@ -38,9 +38,7 @@ export const planTrip = createAsyncThunk<
   try {
     return await routesApi.planTrip(origin, destination);
   } catch (error) {
-    return rejectWithValue(
-      getErrorMessage(error, 'Unable to plan this trip.'),
-    );
+    return rejectWithValue(getErrorMessage(error, 'Unable to plan this trip.'));
   }
 });
 

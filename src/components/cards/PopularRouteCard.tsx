@@ -13,10 +13,7 @@ interface PopularRouteCardProps {
   onPress: () => void;
 }
 
-export const PopularRouteCard = ({
-  route,
-  onPress,
-}: PopularRouteCardProps) => {
+export const PopularRouteCard = ({ route, onPress }: PopularRouteCardProps) => {
   const theme = useAppTheme();
   const meta = TRANSPORTATION_META[route.transportationType];
   const color = getCategoryColor(theme, route.transportationType);

@@ -32,14 +32,21 @@ export const selectFavoritesByType = (type: FavoriteType | 'all') =>
 export const selectFavoriteForRoute = (routeId: string) =>
   createSelector([selectFavorites], favorites =>
     favorites.items.find(
-      item =>
-        item.type === 'route' &&
-        'id' in item.data &&
-        item.data.id === routeId,
+      item => item.type === 'route' && item.targetId === routeId,
     ),
   );
 
-export const selectRoutesByCategory = (category: TransportationCategory | null) =>
+export const selectFavoriteForBoardingPoint = (boardingPointId: string) =>
+  createSelector([selectFavorites], favorites =>
+    favorites.items.find(
+      item =>
+        item.type === 'boarding_point' && item.targetId === boardingPointId,
+    ),
+  );
+
+export const selectRoutesByCategory = (
+  category: TransportationCategory | null,
+) =>
   createSelector([selectRoutes], routes =>
     category
       ? routes.routes.filter(route => route.transportationType === category)

@@ -101,8 +101,7 @@ const transportationSlice = createSlice({
       })
       .addCase(loadTransportationData.rejected, (state, action) => {
         state.loading = false;
-        state.error =
-          action.payload ?? 'Unable to load transportation data.';
+        state.error = action.payload ?? 'Unable to load transportation data.';
       })
       .addCase(loadNearbyBoardingPoints.pending, state => {
         state.loading = true;

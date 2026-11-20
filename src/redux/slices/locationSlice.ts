@@ -16,6 +16,8 @@ const initialState: LocationState = {
   selectedOrigin: null,
   selectedDestination: null,
   permissionStatus: 'undetermined',
+  accessAllowed: false,
+  restoring: false,
   recentSearches: [],
   loading: false,
   error: null,
@@ -24,6 +26,12 @@ const initialState: LocationState = {
 interface LocationError {
   message: string;
   status?: PermissionStatus;
+}
+
+interface RestoreLocationResult {
+  allowed: boolean;
+  location: Location | null;
+  status: PermissionStatus;
 }
 
 export const getCurrentLocation = createAsyncThunk<
@@ -44,6 +52,9 @@ export const getCurrentLocation = createAsyncThunk<
     }
 
     const location = await locationApi.getCurrentLocation();
+    // Any successful grant counts as approval, including "Locate" / "Use my
+    // location" taps outside the first-run prompt.
+    await storage.setItem(STORAGE_KEYS.LOCATION_ACCESS_ALLOWED, 'true');
     try {
       const address = await locationApi.reverseGeocode(
         location.latitude,
@@ -60,6 +71,37 @@ export const getCurrentLocation = createAsyncThunk<
     return rejectWithValue({ message: getErrorMessage(error) });
   }
 });
+
+/**
+ * Re-establishes nearby access on launch after the user approved location in
+ * the first-run prompt. It reads the device directly instead of calling
+ * requestLocationPermission(), so the OS dialog is never shown a second time.
+ * Failures stay silent: they only downgrade permissionStatus, never set an
+ * error banner that would interrupt the user on Home or Explore.
+ */
+export const restoreLocationAccess = createAsyncThunk<RestoreLocationResult>(
+  'location/restoreLocationAccess',
+  async () => {
+    const allowed = await storage.getItem(STORAGE_KEYS.LOCATION_ACCESS_ALLOWED);
+    if (allowed !== 'true') {
+      return { allowed: false, location: null, status: 'undetermined' };
+    }
+
+    try {
+      const location = await locationApi.getCurrentLocation();
+      return { allowed: true, location, status: 'granted' };
+    } catch (error) {
+      return {
+        allowed: true,
+        location: null,
+        status:
+          error instanceof LocationPermissionError
+            ? error.status
+            : 'undetermined',
+      };
+    }
+  },
+);
 
 export const searchPlaces = createAsyncThunk<
   Location[],
@@ -114,10 +156,7 @@ const locationSlice = createSlice({
         state.error = null;
       }
     },
-    setSelectedDestination: (
-      state,
-      action: PayloadAction<Location | null>,
-    ) => {
+    setSelectedDestination: (state, action: PayloadAction<Location | null>) => {
       state.selectedDestination = action.payload;
       if (action.payload) {
         state.error = null;
@@ -128,6 +167,9 @@ const locationSlice = createSlice({
       action: PayloadAction<LocationState['permissionStatus']>,
     ) => {
       state.permissionStatus = action.payload;
+    },
+    setLocationAccessAllowed: (state, action: PayloadAction<boolean>) => {
+      state.accessAllowed = action.payload;
     },
     setCurrentLocation: (state, action: PayloadAction<Location | null>) => {
       state.currentLocation = action.payload;
@@ -155,12 +197,27 @@ const locationSlice = createSlice({
         state.loading = false;
         state.currentLocation = action.payload;
         state.permissionStatus = 'granted';
+        state.accessAllowed = true;
       })
       .addCase(getCurrentLocation.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message ?? 'Unable to get your location.';
         if (action.payload?.status) {
           state.permissionStatus = action.payload.status;
+        }
+      })
+      .addCase(restoreLocationAccess.pending, state => {
+        state.restoring = true;
+      })
+      .addCase(restoreLocationAccess.fulfilled, (state, action) => {
+        state.restoring = false;
+        if (!action.payload.allowed) {
+          return;
+        }
+        state.accessAllowed = true;
+        state.permissionStatus = action.payload.status;
+        if (action.payload.location) {
+          state.currentLocation = action.payload.location;
         }
       })
       .addCase(searchPlaces.pending, state => {
@@ -190,6 +247,7 @@ export const {
   setSelectedOrigin,
   setSelectedDestination,
   setPermissionStatus,
+  setLocationAccessAllowed,
   setCurrentLocation,
   swapOriginDestination,
   clearSelectedLocations,

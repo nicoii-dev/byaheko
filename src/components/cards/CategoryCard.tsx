@@ -34,7 +34,9 @@ export const CategoryCard = ({
         styles.container,
         compact ? styles.compact : styles.regular,
         {
-          backgroundColor: selected ? theme.colors.primary : theme.colors.surface,
+          backgroundColor: selected
+            ? theme.colors.primary
+            : theme.colors.surface,
           borderColor: selected ? theme.colors.primary : theme.colors.outline,
         },
       ]}
@@ -52,9 +54,7 @@ export const CategoryCard = ({
         style={[
           styles.label,
           {
-            color: selected
-              ? theme.colors.onPrimary
-              : theme.colors.onSurface,
+            color: selected ? theme.colors.onPrimary : theme.colors.onSurface,
           },
         ]}
         numberOfLines={2}
